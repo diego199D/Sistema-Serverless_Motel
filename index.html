@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planilla | Motel Mil Amores</title>
+    <link rel="stylesheet" href="estilo.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="light-mode">
+    <header>
+        <button id="menu-toggle" class="hamburger">☰</button>
+        <h1>Mil Amores</h1>
+        <button id="theme-toggle">🌗</button>
+    </header>
+
+    <div id="drawer" class="drawer">
+        <nav>
+            <a class="nav-btn active" href="index.html">Planilla</a>
+            <a class="nav-btn" href="consultar-dia.html">Consultar día</a>
+            <a class="nav-btn" href="reportes.html">Reportes</a>
+        </nav>
+    </div>
+    <div id="overlay" class="overlay"></div>
+
+    <main id="dashboard">
+            <div class="status-overview">
+                <h3>Habitaciones Limpias</h3>
+                <div id="grid-limpias" class="pzas-grid"></div>
+                <h3>Habitaciones Sucias</h3>
+                <div id="grid-sucias" class="pzas-grid"></div>
+            </div>
+
+            <section class="ingreso-form">
+                <h3>Nueva Entrada</h3>
+                <div class="form-grid">
+                    <input type="number" id="nroPza" placeholder="Nro Pieza">
+                    <label class="checkbox-label"><input type="checkbox" id="acCheck"> A/C ❄️</label>
+                    <input type="number" id="adelanto" placeholder="Adelanto" value="0">
+                <button onclick="registrarEntrada()" class="btn btn-primary">REGISTRAR ENTRADA</button>
+            </div>
+        </section>
+
+        <div id="lista-ocupadas" class="cards-container"></div>
+    </main>
+
+    <!-- Modals -->
+    <dialog id="modalLimpieza">
+        <div class="modal-content">
+            <h3>Marcar como limpia?</h3>
+            <p>Pieza: <span id="limp-nro"></span></p>
+            <input type="hidden" id="limp-id">
+            <button onclick="confirmarLimpieza()" class="btn btn-primary">SÍ, LIMPIAR</button>
+            <button onclick="document.getElementById('modalLimpieza').close()" class="btn">Cancelar</button>
+        </div>
+    </dialog>
+
+    <dialog id="modalSalida">
+        <div class="modal-content">
+            <h3>Salida: <span id="m-titulo"></span></h3>
+            <p><strong>Entrada:</strong> <span id="m-entrada"></span></p>
+            <p><strong>Tiempo:</strong> <span id="m-tiempo"></span></p>
+            <h3 class="precio-total">TOTAL: <span id="m-total"></span></h3>
+            <button onclick="procesarSalida()" class="btn btn-primary">DESPACHAR</button>
+            <button onclick="document.getElementById('modalSalida').close()" class="btn">Cerrar</button>
+        </div>
+    </dialog>
+
+    <dialog id="modalEditar">
+        <div class="modal-content">
+            <h3>Editar Habitación</h3>
+            <input type="hidden" id="edit-id">
+            <input type="hidden" id="edit-old-nro">
+            <label>Nro Pieza:</label>
+            <input type="number" id="edit-nro">
+            <label>Hora Entrada:</label>
+            <input type="datetime-local" id="edit-entrada">
+            <label class="checkbox-label"><input type="checkbox" id="edit-ac"> A/C ❄️</label>
+            <button onclick="guardarEdicion()" class="btn btn-primary">GUARDAR</button>
+            <button onclick="eliminarRegistro()" class="btn btn-danger">ELIMINAR</button>
+            <button onclick="document.getElementById('modalEditar').close()" class="btn">Cerrar</button>
+        </div>
+    </dialog>
+    
+    <script src="app.js"></script>
+</body>
+</html>
