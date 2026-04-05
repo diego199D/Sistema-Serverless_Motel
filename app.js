@@ -2,9 +2,11 @@ const SUPABASE_URL = 'https://nxaqzhmojgydoyhpbzfd.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_S99rfoTFEw3IEWpRqdRdUg_RG_cES_D';
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Formatting - Forces Local Timezone Display
+// Formatting (Local Timezone Display)
 const formatTime = (dateStr) => {
+    // Convert UTC string to Date object
     const d = new Date(dateStr);
+    // Display in local time
     return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase();
 };
 
@@ -43,6 +45,7 @@ async function cargarDatos() {
         <div class="card-ocupada">
             <div><strong>Pza ${r.habitaciones.nro_pieza}</strong> ${r.ac ? '❄️' : ''}<br>
             <small>Entrada: ${formatTime(r.entrada)}</small></div>
+            <div style="${r.pago_adelantado > 0 ? 'color: var(--limpia);' : 'color: var(--sucia);'} font-size: 0.8rem;">Pagado: ${parseFloat(r.pago_adelantado).toFixed(2)}bs</div>
             <div>
                 <button class="btn btn-accent btn-sm" onclick="abrirEditar('${r.id}', '${r.entrada}', ${r.habitaciones.nro_pieza}, ${r.ac})">✏️</button>
                 <button class="btn btn-primary btn-sm" onclick="abrirSalida('${r.id}', '${r.habitaciones.nro_pieza}', '${r.entrada}', ${r.pago_adelantado}, ${r.ac})">SALIDA</button>
@@ -56,22 +59,15 @@ async function consultarFecha() {
     const fecha = document.getElementById('input-fecha-consulta').value;
     if (!fecha) return alert("Selecciona una fecha");
     
-    // Obtenemos un rango amplio para asegurar que incluimos todo el día según UTC
-    // Fetch records for the day +- 24h to be safe, then filter in JS
     const { data, error } = await _supabase.from('registros')
         .select('*, habitaciones(nro_pieza)')
-        .not('salida', 'is', null);
+        .not('salida', 'is', null)
+        .order('salida', { ascending: true });
         
-    if (error) {
-        console.error("Error al consultar:", error);
-        return alert("Error en la consulta. Revisa la consola.");
-    }
+    if (error) return console.error(error);
     
-    // Filtramos en JS por fecha local
-    const dataFiltrada = data.filter(r => {
-        const d = new Date(r.salida);
-        return d.toLocaleDateString('en-CA') === fecha; // YYYY-MM-DD
-    });
+    // Filtramos localmente para evitar problemas de zona horaria
+    const dataFiltrada = data.filter(r => new Date(r.salida).toLocaleDateString('en-CA') === fecha);
     
     const res = document.getElementById('resultado-consulta');
     if (dataFiltrada.length === 0) return res.innerHTML = "No hay registros.";
@@ -80,13 +76,7 @@ async function consultarFecha() {
     let total = 0;
     dataFiltrada.forEach(r => {
         total += parseFloat(r.monto_total || 0);
-        html += `<tr style="border-bottom: 1px solid #ccc;">
-            <td style="padding:5px">${r.habitaciones.nro_pieza}</td>
-            <td style="padding:5px">${formatTime(r.entrada)}</td>
-            <td style="padding:5px">${formatTime(r.salida)}</td>
-            <td style="padding:5px">${parseFloat(r.monto_total).toFixed(2)}</td>
-            <td style="padding:5px"><button class="btn btn-danger btn-sm" onclick="eliminarRegistroDia('${r.id}')">Eliminar</button></td>
-        </tr>`;
+        html += `<tr style="border-bottom: 1px solid #ccc;"><td style="padding:5px">${r.habitaciones.nro_pieza}</td><td style="padding:5px">${formatTime(r.entrada)}</td><td style="padding:5px">${formatTime(r.salida)}</td><td style="padding:5px">${parseFloat(r.monto_total).toFixed(2)}</td><td style="padding:5px"><button class="btn btn-danger btn-sm" onclick="eliminarRegistroDia('${r.id}')">Eliminar</button></td></tr>`;
     });
     res.innerHTML = html + `</table><h3 style="text-align:right">Total: ${total.toFixed(2)}</h3>`;
     document.getElementById('btn-pdf-consultar').style.display = 'inline-block';
@@ -106,44 +96,6 @@ async function generarReporte() {
     if (error) return console.error(error);
     
     const dataFiltrada = data.filter(r => {
-        const d = new Date(r.salida).toISOString().split('T')[0];
-        return d >= inicio && d <= fin;
-    });
-    
-    const res = document.getElementById('resultado-reporte');
-    if (dataFiltrada.length === 0) return res.innerHTML = "No hay registros.";
-    
-    let html = `<table style="width:100%; border-collapse: collapse; font-size: 14px;"><tr style="background:#ddd"><th>Pza</th><th>Entrada</th><th>Salida</th><th>Total</th></tr>`;
-    let total = 0;
-    dataFiltrada.forEach(r => {
-        total += parseFloat(r.monto_total || 0);
-        html += `<tr style="border-bottom: 1px solid #ccc;"><td style="padding:5px">${r.habitaciones.nro_pieza}</td><td style="padding:5px">${formatTime(r.entrada)}</td><td style="padding:5px">${formatTime(r.salida)}</td><td style="padding:5px">${parseFloat(r.monto_total).toFixed(2)}</td></tr>`;
-    });
-    res.innerHTML = html + `</table><h3 style="text-align:right">Total: ${total.toFixed(2)}</h3>`;
-    document.getElementById('btn-pdf').style.display = 'inline-block';
-    window.reporteData = dataFiltrada;
-}
-
-async function eliminarRegistroDia(id) {
-    if (!confirm("¿Seguro que quieres eliminar este registro?")) return;
-    await _supabase.from('registros').delete().eq('id', id);
-    consultarFecha(); 
-}
-
-// Reportes (Rango)
-async function generarReporte() {
-    const inicio = document.getElementById('fecha-inicio').value;
-    const fin = document.getElementById('fecha-fin').value;
-    if (!inicio || !fin) return alert("Selecciona rango de fechas");
-    
-    const { data, error } = await _supabase.from('registros')
-        .select('*, habitaciones(nro_pieza)')
-        .not('salida', 'is', null);
-        
-    if (error) return console.error(error);
-    
-    // Filtramos usando fecha local
-    const dataFiltrada = data.filter(r => {
         const d = new Date(r.salida).toLocaleDateString('en-CA');
         return d >= inicio && d <= fin;
     });
@@ -162,6 +114,7 @@ async function generarReporte() {
     window.reporteData = dataFiltrada;
 }
 
+// Export PDF / Helpers / Logic
 function exportarPDF() {
     if(!window.reporteData) return;
     const { jsPDF } = window.jspdf;
@@ -180,7 +133,6 @@ function exportarPDFConsultar() {
     doc.save("reporte_dia.pdf");
 }
 
-// Lógica de Salida/Edición/Entrada
 function recalcularSalida(entradaStr, adelanto, ac) {
     const entrada = new Date(entradaStr);
     const salida = new Date();
@@ -207,9 +159,11 @@ function recalcularSalida(entradaStr, adelanto, ac) {
             else if (minutos >= 17) costoHab += 10;
         }
     }
-    let totalPagar = costoHab - adelanto;
+    let adelantoVal = parseFloat(adelanto) || 0;
+    let totalPagar = costoHab - adelantoVal;
     if (totalPagar < 0) totalPagar = 0;
     document.getElementById('m-tiempo').innerText = `${horas}h ${minutos}m`;
+    document.getElementById('m-precio').innerText = costoHab.toFixed(2);
     document.getElementById('m-total').innerText = totalPagar.toFixed(2);
 }
 
@@ -218,11 +172,13 @@ function abrirSalida(id, nro, entrada, adelanto, ac) {
     registroActual = { id, entrada, adelanto, ac };
     document.getElementById('m-titulo').innerText = nro;
     document.getElementById('m-entrada').innerText = formatTime(entrada);
+    document.getElementById('m-adelanto').innerText = parseFloat(adelanto).toFixed(2);
     recalcularSalida(entrada, adelanto, ac);
     document.getElementById('modalSalida').showModal();
 }
 
 async function procesarSalida() {
+    if (!confirm("¿Está seguro de despachar esta habitación?")) return;
     const { id } = registroActual;
     const total = parseFloat(document.getElementById('m-total').innerText);
     const { data: reg } = await _supabase.from('registros').select('habitacion_id').eq('id', id).single();
@@ -271,6 +227,12 @@ async function eliminarRegistro() {
     await _supabase.from('registros').delete().eq('id', id);
     document.getElementById('modalEditar').close();
     cargarDatos();
+}
+
+async function eliminarRegistroDia(id) {
+    if (!confirm("¿Seguro que quieres eliminar este registro?")) return;
+    await _supabase.from('registros').delete().eq('id', id);
+    consultarFecha(); 
 }
 
 async function registrarEntrada() {

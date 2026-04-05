@@ -24,19 +24,19 @@
     <div id="overlay" class="overlay"></div>
 
     <main id="dashboard">
-            <div class="status-overview">
-                <h3>Habitaciones Limpias</h3>
-                <div id="grid-limpias" class="pzas-grid"></div>
-                <h3>Habitaciones Sucias</h3>
-                <div id="grid-sucias" class="pzas-grid"></div>
-            </div>
+        <div class="status-overview">
+            <h3>Habitaciones Limpias</h3>
+            <div id="grid-limpias" class="pzas-grid"></div>
+            <h3>Habitaciones Sucias</h3>
+            <div id="grid-sucias" class="pzas-grid"></div>
+        </div>
 
-            <section class="ingreso-form">
-                <h3>Nueva Entrada</h3>
-                <div class="form-grid">
-                    <input type="number" id="nroPza" placeholder="Nro Pieza">
-                    <label class="checkbox-label"><input type="checkbox" id="acCheck"> A/C ❄️</label>
-                    <input type="number" id="adelanto" placeholder="Adelanto" value="0">
+        <section class="ingreso-form">
+            <h3>Nueva Entrada</h3>
+            <div class="form-grid">
+                <input type="number" id="nroPza" placeholder="Nro Pieza">
+                <label class="checkbox-label"><input type="checkbox" id="acCheck"> A/C ❄️</label>
+                <input type="number" id="adelanto" placeholder="Adelanto" value="0">
                 <button onclick="registrarEntrada()" class="btn btn-primary">REGISTRAR ENTRADA</button>
             </div>
         </section>
@@ -59,8 +59,10 @@
         <div class="modal-content">
             <h3>Salida: <span id="m-titulo"></span></h3>
             <p><strong>Entrada:</strong> <span id="m-entrada"></span></p>
+            <p><strong>Adelanto:</strong> <span id="m-adelanto"></span></p>
+            <p><strong>Precio Habitación:</strong> <span id="m-precio"></span></p>
             <p><strong>Tiempo:</strong> <span id="m-tiempo"></span></p>
-            <h3 class="precio-total">TOTAL: <span id="m-total"></span></h3>
+            <h3 class="precio-total" style="color: green;">TOTAL A PAGAR: <span id="m-total"></span></h3>
             <button onclick="procesarSalida()" class="btn btn-primary">DESPACHAR</button>
             <button onclick="document.getElementById('modalSalida').close()" class="btn">Cerrar</button>
         </div>
