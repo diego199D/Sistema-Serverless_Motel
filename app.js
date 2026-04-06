@@ -11,6 +11,7 @@ const formatTime = (dateStr) => {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    //document.body.classList.add('dark-mode');
     const drawer = document.getElementById('drawer');
     const overlay = document.getElementById('overlay');
     const menuToggle = document.getElementById('menu-toggle');
@@ -241,6 +242,9 @@ async function registrarEntrada() {
     if(!hab || hab.estado !== 'limpia') return alert("Habitación no disponible");
     await _supabase.from('habitaciones').update({ estado: 'ocupada' }).eq('id', hab.id);
     await _supabase.from('registros').insert([{ habitacion_id: hab.id, pago_adelantado: document.getElementById('adelanto').value, ac: document.getElementById('acCheck').checked }]);
+    document.getElementById('nroPza').value = '';
+    document.getElementById('adelanto').value = '0';
+    document.getElementById('acCheck').checked = false;
     cargarDatos();
 }
 
