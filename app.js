@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (themeBtn) { themeBtn.onclick = () => { document.body.classList.toggle('dark-mode'); }; }
     
     if (document.getElementById('grid-limpias')) cargarDatos();
+    if (document.getElementById('resultado-consulta')) consultarFecha();
 });
 
 // Dashboard
@@ -55,10 +56,15 @@ async function cargarDatos() {
     `).join('');
 }
 
-// Consultar día
+// Consultar día — carga automática con fecha de hoy
 async function consultarFecha() {
-    const fecha = document.getElementById('input-fecha-consulta').value;
-    if (!fecha) return alert("Selecciona una fecha");
+    const fecha = new Date().toLocaleDateString('en-CA');
+    // Mostrar título con fecha legible
+    const tituloEl = document.getElementById('titulo-fecha-consulta');
+    if (tituloEl) {
+        const fechaLegible = new Date().toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long' });
+        tituloEl.innerText = fechaLegible.charAt(0).toUpperCase() + fechaLegible.slice(1);
+    }
     
     const { data, error } = await _supabase.from('registros')
         .select('*, habitaciones(nro_pieza)')
@@ -67,21 +73,77 @@ async function consultarFecha() {
         
     if (error) return console.error(error);
     
-    // Filtramos localmente para evitar problemas de zona horaria
     const dataFiltrada = data.filter(r => new Date(r.salida).toLocaleDateString('en-CA') === fecha);
     
     const res = document.getElementById('resultado-consulta');
-    if (dataFiltrada.length === 0) return res.innerHTML = "No hay registros.";
+    if (!res) return;
+    if (dataFiltrada.length === 0) return res.innerHTML = "<p style='padding:16px;text-align:center;color:var(--text-muted)'>No hay registros hoy.</p>";
     
-    let html = `<table style="width:100%; border-collapse: collapse; font-size: 14px;"><tr style="background:#ddd"><th>Pza</th><th>Entrada</th><th>Salida</th><th>Total</th><th>Acción</th></tr>`;
+    let html = `<table style="width:100%; border-collapse: collapse; font-size: 14px;">
+        <tr><th>Pza</th><th>Entrada</th><th>Salida</th><th>Total</th><th></th></tr>`;
     let total = 0;
     dataFiltrada.forEach(r => {
         total += parseFloat(r.monto_total || 0);
-        html += `<tr style="border-bottom: 1px solid #ccc;"><td style="padding:5px">${r.habitaciones.nro_pieza}</td><td style="padding:5px">${formatTime(r.entrada)}</td><td style="padding:5px">${formatTime(r.salida)}</td><td style="padding:5px">${parseFloat(r.monto_total).toFixed(2)}</td><td style="padding:5px"><button class="btn btn-danger btn-sm" onclick="eliminarRegistroDia('${r.id}')">Eliminar</button></td></tr>`;
+        html += `<tr>
+            <td>${r.habitaciones.nro_pieza}</td>
+            <td>${formatTime(r.entrada)}</td>
+            <td>${formatTime(r.salida)}</td>
+            <td>${parseFloat(r.monto_total).toFixed(2)}</td>
+            <td style="display:flex;flex-direction:column;gap:4px;padding:6px 4px;">
+                <button class="btn btn-accent btn-sm" onclick="abrirEditarDia('${r.id}','${r.entrada}','${r.salida}',${r.monto_total})">✏️</button>
+                <button class="btn btn-danger btn-sm" onclick="eliminarRegistroDia('${r.id}')">🗑</button>
+            </td>
+        </tr>`;
     });
     res.innerHTML = html + `</table><h3 style="text-align:right">Total: ${total.toFixed(2)}</h3>`;
-    document.getElementById('btn-pdf-consultar').style.display = 'inline-block';
+    const btnPdf = document.getElementById('btn-pdf-consultar');
+    if (btnPdf) btnPdf.style.display = 'inline-block';
     window.reporteData = dataFiltrada;
+}
+
+function abrirEditarDia(id, entrada, salida, total) {
+    document.getElementById('edia-id').value = id;
+    // Entrada
+    const dEnt = new Date(entrada);
+    let hEnt = dEnt.getHours(), mEnt = dEnt.getMinutes();
+    const ampmEnt = hEnt >= 12 ? 'PM' : 'AM';
+    hEnt = hEnt % 12 || 12;
+    document.getElementById('edia-entrada-h').value = hEnt;
+    document.getElementById('edia-entrada-m').value = String(mEnt).padStart(2,'0');
+    document.getElementById('edia-entrada-ampm').value = ampmEnt;
+    // Salida
+    const dSal = new Date(salida);
+    let hSal = dSal.getHours(), mSal = dSal.getMinutes();
+    const ampmSal = hSal >= 12 ? 'PM' : 'AM';
+    hSal = hSal % 12 || 12;
+    document.getElementById('edia-salida-h').value = hSal;
+    document.getElementById('edia-salida-m').value = String(mSal).padStart(2,'0');
+    document.getElementById('edia-salida-ampm').value = ampmSal;
+    // Total
+    document.getElementById('edia-total').value = parseFloat(total).toFixed(2);
+    document.getElementById('modalEditarDia').showModal();
+}
+
+async function guardarEdicionDia() {
+    const id = document.getElementById('edia-id').value;
+    // Entrada
+    let hEnt = parseInt(document.getElementById('edia-entrada-h').value) || 0;
+    const mEnt = parseInt(document.getElementById('edia-entrada-m').value) || 0;
+    const ampmEnt = document.getElementById('edia-entrada-ampm').value;
+    let h24Ent = hEnt % 12; if (ampmEnt === 'PM') h24Ent += 12;
+    // Salida
+    let hSal = parseInt(document.getElementById('edia-salida-h').value) || 0;
+    const mSal = parseInt(document.getElementById('edia-salida-m').value) || 0;
+    const ampmSal = document.getElementById('edia-salida-ampm').value;
+    let h24Sal = hSal % 12; if (ampmSal === 'PM') h24Sal += 12;
+    const total = parseFloat(document.getElementById('edia-total').value) || 0;
+    // Use today's date as base
+    const hoy = new Date().toLocaleDateString('en-CA');
+    const entradaISO = new Date(`${hoy}T${String(h24Ent).padStart(2,'0')}:${String(mEnt).padStart(2,'0')}:00`).toISOString();
+    const salidaISO  = new Date(`${hoy}T${String(h24Sal).padStart(2,'0')}:${String(mSal).padStart(2,'0')}:00`).toISOString();
+    await _supabase.from('registros').update({ entrada: entradaISO, salida: salidaISO, monto_total: total }).eq('id', id);
+    document.getElementById('modalEditarDia').close();
+    consultarFecha();
 }
 
 // Reportes (Rango)
@@ -141,6 +203,38 @@ function recalcularSalida(entradaStr, adelanto, ac) {
     if (diffMin < 0) diffMin = 0;
     let horas = Math.floor(diffMin / 60);
     let minutos = diffMin % 60;
+    let costoHab = calcularCosto(horas, minutos, diffMin, ac);
+    let adelantoVal = parseFloat(adelanto) || 0;
+    let totalPagar = Math.max(0, costoHab - adelantoVal);
+    document.getElementById('m-tiempo').innerText = `${horas}h ${minutos}m`;
+    document.getElementById('m-precio').innerText = costoHab.toFixed(2);
+    document.getElementById('m-total').innerText = totalPagar.toFixed(2);
+}
+
+function recalcularSalidaConHora(entradaStr, adelanto, ac) {
+    const h = parseInt(document.getElementById('m-salida-h').value) || 0;
+    const m = parseInt(document.getElementById('m-salida-m').value) || 0;
+    const ampm = document.getElementById('m-salida-ampm').value;
+    let h24 = h % 12;
+    if (ampm === 'PM') h24 += 12;
+    const entrada = new Date(entradaStr);
+    const salida = new Date();
+    salida.setHours(h24, m, 0, 0);
+    // If salida is before entrada, assume next day
+    if (salida < entrada) salida.setDate(salida.getDate() + 1);
+    let diffMin = Math.floor((salida - entrada) / 60000);
+    if (diffMin < 0) diffMin = 0;
+    let horas = Math.floor(diffMin / 60);
+    let minutos = diffMin % 60;
+    let costoHab = calcularCosto(horas, minutos, diffMin, ac);
+    let adelantoVal = parseFloat(adelanto) || 0;
+    let totalPagar = Math.max(0, costoHab - adelantoVal);
+    document.getElementById('m-tiempo').innerText = `${horas}h ${minutos}m`;
+    document.getElementById('m-precio').innerText = costoHab.toFixed(2);
+    document.getElementById('m-total').innerText = totalPagar.toFixed(2);
+}
+
+function calcularCosto(horas, minutos, diffMin, ac) {
     let costoHab = 0;
     if (ac == 1 || ac == true) {
         if (diffMin <= 76) costoHab = 35; 
@@ -160,12 +254,7 @@ function recalcularSalida(entradaStr, adelanto, ac) {
             else if (minutos >= 17) costoHab += 10;
         }
     }
-    let adelantoVal = parseFloat(adelanto) || 0;
-    let totalPagar = costoHab - adelantoVal;
-    if (totalPagar < 0) totalPagar = 0;
-    document.getElementById('m-tiempo').innerText = `${horas}h ${minutos}m`;
-    document.getElementById('m-precio').innerText = costoHab.toFixed(2);
-    document.getElementById('m-total').innerText = totalPagar.toFixed(2);
+    return costoHab;
 }
 
 let registroActual = null;
@@ -174,7 +263,20 @@ function abrirSalida(id, nro, entrada, adelanto, ac) {
     document.getElementById('m-titulo').innerText = nro;
     document.getElementById('m-entrada').innerText = formatTime(entrada);
     document.getElementById('m-adelanto').innerText = parseFloat(adelanto).toFixed(2);
-    recalcularSalida(entrada, adelanto, ac);
+    // Set current time in AM/PM fields
+    const ahora = new Date();
+    let h = ahora.getHours();
+    const m = ahora.getMinutes();
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    document.getElementById('m-salida-h').value = h;
+    document.getElementById('m-salida-m').value = String(m).padStart(2, '0');
+    document.getElementById('m-salida-ampm').value = ampm;
+    // Add listeners to recalculate on change
+    ['m-salida-h','m-salida-m','m-salida-ampm'].forEach(id => {
+        document.getElementById(id).oninput = () => recalcularSalidaConHora(entrada, adelanto, ac);
+    });
+    recalcularSalidaConHora(entrada, adelanto, ac);
     document.getElementById('modalSalida').showModal();
 }
 
@@ -182,10 +284,20 @@ async function procesarSalida() {
     if (!confirm("¿Está seguro de despachar esta habitación?")) return;
     const { id } = registroActual;
     const total = parseFloat(document.getElementById('m-total').innerText);
+    // Build salida datetime from AM/PM fields
+    const h = parseInt(document.getElementById('m-salida-h').value) || 0;
+    const m = parseInt(document.getElementById('m-salida-m').value) || 0;
+    const ampm = document.getElementById('m-salida-ampm').value;
+    let h24 = h % 12;
+    if (ampm === 'PM') h24 += 12;
+    const salidaDate = new Date();
+    salidaDate.setHours(h24, m, 0, 0);
     const { data: reg } = await _supabase.from('registros').select('habitacion_id').eq('id', id).single();
     await _supabase.from('habitaciones').update({ estado: 'sucia' }).eq('id', reg.habitacion_id);
-    await _supabase.from('registros').update({ salida: new Date().toISOString(), monto_total: total }).eq('id', id);
+    await _supabase.from('registros').update({ salida: salidaDate.toISOString(), monto_total: total }).eq('id', id);
     document.getElementById('modalSalida').close();
+    // Limpiar spans
+    ['m-titulo','m-entrada','m-adelanto','m-precio','m-tiempo','m-total'].forEach(i => document.getElementById(i).innerText = '');
     cargarDatos();
 }
 
@@ -195,8 +307,19 @@ function abrirEditar(id, entrada, nro, ac) {
     document.getElementById('edit-nro').value = nro;
     document.getElementById('edit-ac').checked = ac;
     const d = new Date(entrada);
-    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-    document.getElementById('edit-entrada').value = d.toISOString().slice(0, 16);
+    // Fecha
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    document.getElementById('edit-fecha').value = `${yyyy}-${mm}-${dd}`;
+    // Hora AM/PM
+    let h = d.getHours();
+    const min = d.getMinutes();
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    document.getElementById('edit-hora-h').value = h;
+    document.getElementById('edit-hora-m').value = String(min).padStart(2,'0');
+    document.getElementById('edit-hora-ampm').value = ampm;
     document.getElementById('modalEditar').showModal();
 }
 
@@ -205,16 +328,24 @@ async function guardarEdicion() {
     const oldNro = document.getElementById('edit-old-nro').value;
     const newNro = document.getElementById('edit-nro').value;
     const ac = document.getElementById('edit-ac').checked;
-    const entrada = document.getElementById('edit-entrada').value;
+    // Build entrada ISO from date + AM/PM time
+    const fecha = document.getElementById('edit-fecha').value;
+    let h = parseInt(document.getElementById('edit-hora-h').value) || 0;
+    const min = parseInt(document.getElementById('edit-hora-m').value) || 0;
+    const ampm = document.getElementById('edit-hora-ampm').value;
+    let h24 = h % 12;
+    if (ampm === 'PM') h24 += 12;
+    const entradaDate = new Date(`${fecha}T${String(h24).padStart(2,'0')}:${String(min).padStart(2,'0')}:00`);
+    const entrada = entradaDate.toISOString();
     if (oldNro != newNro) {
         const { data: oldHab } = await _supabase.from('habitaciones').select('id').eq('nro_pieza', oldNro).single();
         const { data: newHab } = await _supabase.from('habitaciones').select('id, estado').eq('nro_pieza', newNro).single();
         if (newHab.estado !== 'limpia') return alert("Nueva habitación no está limpia");
         await _supabase.from('habitaciones').update({ estado: 'sucia' }).eq('id', oldHab.id);
         await _supabase.from('habitaciones').update({ estado: 'ocupada' }).eq('id', newHab.id);
-        await _supabase.from('registros').update({ habitacion_id: newHab.id, ac: ac, entrada: new Date(entrada).toISOString() }).eq('id', id);
+        await _supabase.from('registros').update({ habitacion_id: newHab.id, ac: ac, entrada }).eq('id', id);
     } else {
-        await _supabase.from('registros').update({ ac: ac, entrada: new Date(entrada).toISOString() }).eq('id', id);
+        await _supabase.from('registros').update({ ac: ac, entrada }).eq('id', id);
     }
     document.getElementById('modalEditar').close();
     cargarDatos();

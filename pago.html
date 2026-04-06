@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reportes | Motel Mil Amores</title>
+    <title>Consultar día | Motel Mil Amores</title>
     <link rel="stylesheet" href="estilo.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -12,7 +12,7 @@
 <body class="light-mode">
     <header>
         <button id="menu-toggle" class="hamburger">☰</button>
-        <h1>Reportes</h1>
+        <h1>PAGO</h1>
         <button id="theme-toggle">🌗</button>
     </header>
 
@@ -20,25 +20,15 @@
         <nav>
             <a class="nav-btn" href="index.html">Planilla</a>
             <a class="nav-btn" href="consultar-dia.html">Consultar día</a>
-            <a class="nav-btn active" href="reportes.html">Reportes</a>
-            <a class="nav-btn" href="pago.html">Pago QR</a>
+            <a class="nav-btn" href="reportes.html">Reportes</a>
+            <a class="nav-btn active" href="pago.html">Pago QR</a>
         </nav>
     </div>
     <div id="overlay" class="overlay"></div>
-
-    <main>
-        <section class="ingreso-form">
-            <h3>Seleccionar Rango</h3>
-            <div class="form-grid">
-                <input type="date" id="fecha-inicio">
-                <input type="date" id="fecha-fin">
-                <button onclick="generarReporte()" class="btn btn-primary">Generar</button>
-                <button onclick="exportarPDF()" class="btn btn-accent" id="btn-pdf" style="display:none">Exportar PDF</button>
-            </div>
-        </section>
-        <div id="resultado-reporte" class="cards-container" style="padding: 10px;"></div>
-    </main>
-
+    <div class="pagos">
+        <h1>Mostrar Comprobante al pagar 🔎</h1>
+        <img src="photo.jpg" alt="">
+    </div>
     <script src="app.js"></script>
 </body>
 </html>

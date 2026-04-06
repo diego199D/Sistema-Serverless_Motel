@@ -19,6 +19,7 @@
             <a class="nav-btn active" href="index.html">Planilla</a>
             <a class="nav-btn" href="consultar-dia.html">Consultar día</a>
             <a class="nav-btn" href="reportes.html">Reportes</a>
+            <a class="nav-btn" href="pago.html">Pago QR</a>
         </nav>
     </div>
     <div id="overlay" class="overlay"></div>
@@ -32,11 +33,11 @@
         </div>
 
         <section class="ingreso-form">
-            <h3>Nueva Entrada</h3>
+            <h3>Nueva Entrada:</h3>
             <div class="form-grid">
                 <input type="number" id="nroPza" placeholder="Nro Pieza">
                 <label class="checkbox-label"><input type="checkbox" id="acCheck"> A/C ❄️</label>
-                <input type="number" id="adelanto" placeholder="Adelanto" value="0">
+                <input type="number" id="adelanto" placeholder="Adelanto Bs" value="Adelanto_BS">
                 <button onclick="registrarEntrada()" class="btn btn-primary">REGISTRAR ENTRADA</button>
             </div>
         </section>
@@ -57,12 +58,23 @@
 
     <dialog id="modalSalida">
         <div class="modal-content">
-            <h3>Salida: <span id="m-titulo"></span></h3>
+            <h3>HABITACION:  <span id="m-titulo"></span></h3>
             <p><strong>Entrada:</strong> <span id="m-entrada"></span></p>
-            <p><strong>Adelanto:</strong> <span id="m-adelanto"></span></p>
-            <p><strong>Precio Habitación:</strong> <span id="m-precio"></span></p>
-            <p><strong>Tiempo:</strong> <span id="m-tiempo"></span></p>
-            <h3 class="precio-total" style="color: green;">TOTAL A PAGAR: <span id="m-total"></span></h3>
+            <label style="font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);">Hora de Salida:</label>
+            <div class="time-ampm-row">
+                <input type="number" id="m-salida-h" min="1" max="12" placeholder="HH" class="time-input">
+                <span class="time-sep">:</span>
+                <input type="number" id="m-salida-m" min="0" max="59" placeholder="MM" class="time-input">
+                <select id="m-salida-ampm" class="ampm-select">
+                    <option>AM</option>
+                    <option>PM</option>
+                </select>
+            </div>
+            <p><strong>Adelanto:</strong> <span id="m-adelanto"></span> bs</p>
+            <p><strong>Precio Habitación:</strong> <span id="m-precio"></span> bs</p>
+            <p><strong>Tiempo total:</strong> <span id="m-tiempo"></span></p>
+            
+            <h3 class="precio-total">TOTAL A PAGAR: <span id="m-total"></span></h3>
             <button onclick="procesarSalida()" class="btn btn-primary">DESPACHAR</button>
             <button onclick="document.getElementById('modalSalida').close()" class="btn">Cerrar</button>
         </div>
@@ -75,8 +87,18 @@
             <input type="hidden" id="edit-old-nro">
             <label>Nro Pieza:</label>
             <input type="number" id="edit-nro">
+            <label>Fecha Entrada:</label>
+            <input type="date" id="edit-fecha" style="width:100%;padding:13px 16px;background:var(--bg2);border:1.5px solid var(--border-vivid);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:1rem;font-weight:600;outline:none;">
             <label>Hora Entrada:</label>
-            <input type="datetime-local" id="edit-entrada">
+            <div class="time-ampm-row">
+                <input type="number" id="edit-hora-h" min="1" max="12" placeholder="HH" class="time-input">
+                <span class="time-sep">:</span>
+                <input type="number" id="edit-hora-m" min="0" max="59" placeholder="MM" class="time-input">
+                <select id="edit-hora-ampm" class="ampm-select">
+                    <option>AM</option>
+                    <option>PM</option>
+                </select>
+            </div>
             <label class="checkbox-label"><input type="checkbox" id="edit-ac"> A/C ❄️</label>
             <button onclick="guardarEdicion()" class="btn btn-primary">GUARDAR</button>
             <button onclick="eliminarRegistro()" class="btn btn-danger">ELIMINAR</button>

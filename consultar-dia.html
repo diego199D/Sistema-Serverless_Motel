@@ -21,21 +21,52 @@
             <a class="nav-btn" href="index.html">Planilla</a>
             <a class="nav-btn active" href="consultar-dia.html">Consultar día</a>
             <a class="nav-btn" href="reportes.html">Reportes</a>
+            <a class="nav-btn" href="pago.html">Pago QR</a>
         </nav>
     </div>
     <div id="overlay" class="overlay"></div>
 
     <main class="tab-content active">
         <section class="ingreso-form">
-            <h3>Seleccionar fecha</h3>
-            <div class="form-grid">
-                <input type="date" id="input-fecha-consulta">
-                <button onclick="consultarFecha()" class="btn btn-primary">Consultar</button>
+            <h3 id="titulo-fecha-consulta">Cargando...</h3>
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
                 <button onclick="exportarPDFConsultar()" class="btn btn-accent" id="btn-pdf-consultar" style="display:none">Exportar PDF</button>
             </div>
         </section>
-        <div id="resultado-consulta" style="padding: 10px;"></div>
+        <div id="resultado-consulta"></div>
     </main>
+
+    <!-- Modal editar registro del día -->
+    <dialog id="modalEditarDia">
+        <div class="modal-content">
+            <h3>Editar Registro</h3>
+            <input type="hidden" id="edia-id">
+            <label>Hora Entrada:</label>
+            <div class="time-ampm-row">
+                <input type="number" id="edia-entrada-h" min="1" max="12" placeholder="HH" class="time-input">
+                <span class="time-sep">:</span>
+                <input type="number" id="edia-entrada-m" min="0" max="59" placeholder="MM" class="time-input">
+                <select id="edia-entrada-ampm" class="ampm-select">
+                    <option>AM</option>
+                    <option>PM</option>
+                </select>
+            </div>
+            <label>Hora Salida:</label>
+            <div class="time-ampm-row">
+                <input type="number" id="edia-salida-h" min="1" max="12" placeholder="HH" class="time-input">
+                <span class="time-sep">:</span>
+                <input type="number" id="edia-salida-m" min="0" max="59" placeholder="MM" class="time-input">
+                <select id="edia-salida-ampm" class="ampm-select">
+                    <option>AM</option>
+                    <option>PM</option>
+                </select>
+            </div>
+            <label>Total (bs):</label>
+            <input type="number" id="edia-total" step="0.01">
+            <button onclick="guardarEdicionDia()" class="btn btn-primary">GUARDAR</button>
+            <button onclick="document.getElementById('modalEditarDia').close()" class="btn">Cancelar</button>
+        </div>
+    </dialog>
 
     <script src="app.js"></script>
 </body>
