@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="light-mode">
     <header>
@@ -20,6 +21,7 @@
         <nav>
             <a class="nav-btn" href="index.html">Planilla</a>
             <a class="nav-btn" href="consultar-dia.html">Consultar día</a>
+            <a class="nav-btn" href="gestion.html">Gestionar historial</a>
             <a class="nav-btn active" href="reportes.html">Reportes</a>
             <a class="nav-btn" href="pago.html">Pago QR</a>
         </nav>
@@ -38,6 +40,37 @@
         </section>
         <div id="resultado-reporte" class="cards-container" style="padding: 10px;"></div>
     </main>
+
+    <dialog id="modalEditarDia">
+    <div class="modal-content">
+        <h3>Editar Registro</h3>
+        <input type="hidden" id="edia-id">
+        <label>Hora Entrada:</label>
+        <div class="time-ampm-row">
+            <input type="number" id="edia-entrada-h" min="1" max="12" placeholder="HH" class="time-input">
+            <span class="time-sep">:</span>
+            <input type="number" id="edia-entrada-m" min="0" max="59" placeholder="MM" class="time-input">
+            <select id="edia-entrada-ampm" class="ampm-select">
+                <option>AM</option>
+                <option>PM</option>
+            </select>
+        </div>
+        <label>Hora Salida:</label>
+        <div class="time-ampm-row">
+            <input type="number" id="edia-salida-h" min="1" max="12" placeholder="HH" class="time-input">
+            <span class="time-sep">:</span>
+            <input type="number" id="edia-salida-m" min="0" max="59" placeholder="MM" class="time-input">
+            <select id="edia-salida-ampm" class="ampm-select">
+                <option>AM</option>
+                <option>PM</option>
+            </select>
+        </div>
+        <label>Total (bs):</label>
+        <input type="number" id="edia-total" step="1">
+        <button onclick="guardarEdicionDiaReporte()" class="btn btn-primary">GUARDAR</button>
+        <button onclick="document.getElementById('modalEditarDia').close()" class="btn">Cancelar</button>
+    </div>
+</dialog>
 
     <script src="app.js"></script>
 </body>

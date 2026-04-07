@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar historial | Motel Mil Amores</title>
+    <link rel="stylesheet" href="estilo.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="light-mode">
+    <header>
+        <button id="menu-toggle" class="hamburger">☰</button>
+        <h1>Gestionar historial</h1>
+        <button id="theme-toggle">🌗</button>
+    </header>
+
+    <div id="drawer" class="drawer">
+        <nav>
+            <a class="nav-btn" href="index.html">Planilla</a>
+            <a class="nav-btn" href="consultar-dia.html">Consultar día</a>
+            <a class="nav-btn active" href="gestion.html">Gestionar historial</a>
+            <a class="nav-btn" href="reportes.html">Reportes</a>
+            <a class="nav-btn" href="pago.html">Pago QR</a>
+        </nav>
+    </div>
+    <div id="overlay" class="overlay"></div>
+
+    <main class="tab-content active">
+        <section class="ingreso-form">
+            <h3>Seleccionar Fecha para Gestionar</h3>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <input type="date" id="fecha-gestion" class="time-input" style="flex:1">
+                <button onclick="consultarFechaGestion()" class="btn btn-primary">Cargar Día</button>
+            </div>
+        </section>
+
+        <section class="cuaderno-container">
+    <details class="cuaderno-details">
+        <summary class="cuaderno-summary">
+            <span class="icon">📝</span> 
+            <span class="text">Anotar del Cuaderno</span>
+        </summary>
+        
+        <div class="cuaderno-body">
+            <div class="cuaderno-field">
+                <label>Habitación</label>
+                <select id="manual-hab" class="minimal-input select-color"></select>
+            </div>
+
+            <label class="cuaderno-field-ac-card" for="manual-ac">
+                <div class="ac-info">
+                    <span class="ac-icon">❄️</span>
+                    <span class="ac-text">Aire Acondicionado</span>
+                </div>
+                <input type="checkbox" id="manual-ac">
+                <span class="custom-check"></span>
+            </label>
+
+            <div class="cuaderno-field">
+                <label>Monto Total (bs)</label>
+                <input type="number" id="manual-total" class="minimal-input monto-color" placeholder="0.00" step="0.1">
+            </div>
+
+            <div class="cuaderno-field">
+                <label>🕒 Hora Entrada</label>
+                <input type="time" id="manual-ent-time" class="minimal-input time-color">
+            </div>
+
+            <div class="cuaderno-field">
+                <label>🕒 Hora Salida</label>
+                <input type="time" id="manual-sal-time" class="minimal-input time-color">
+            </div>
+
+            <div style="text-align: center; margin-top: 5px;">
+                <button onclick="insertarDatoCuaderno()" class="btn-zaz-small">
+                    🚀 ANOTAR FILA
+                </button>
+            </div>
+        </div>
+    </details>
+</section>
+
+        <div id="resultado-gestion"></div>
+    </main>
+
+    <dialog id="modalEditarGestion">
+        <div class="modal-content">
+            <h3>Editar Registro Histórico</h3>
+            <input type="hidden" id="egest-id">
+            
+            <label>Hora Entrada:</label>
+            <div class="time-ampm-row">
+                <input type="number" id="egest-entrada-h" min="1" max="12" class="time-input">
+                <span class="time-sep">:</span>
+                <input type="number" id="egest-entrada-m" min="0" max="59" class="time-input">
+                <select id="egest-entrada-ampm" class="ampm-select">
+                    <option>AM</option><option>PM</option>
+                </select>
+            </div>
+
+            <label>Hora Salida:</label>
+            <div class="time-ampm-row">
+                <input type="number" id="egest-salida-h" min="1" max="12" class="time-input">
+                <span class="time-sep">:</span>
+                <input type="number" id="egest-salida-m" min="0" max="59" class="time-input">
+                <select id="egest-salida-ampm" class="ampm-select">
+                    <option>AM</option><option>PM</option>
+                </select>
+            </div>
+
+            <label>Total (bs):</label>
+            <input type="number" id="egest-total" step="0.01">
+
+            <div style="margin-top:15px; display:flex; gap:10px;">
+                <button onclick="guardarEdicionGestion()" class="btn btn-primary">GUARDAR CAMBIOS</button>
+                <button onclick="document.getElementById('modalEditarGestion').close()" class="btn">Cancelar</button>
+            </div>
+        </div>
+    </dialog>
+
+    <script src="app.js"></script>
+</body>
+</html>

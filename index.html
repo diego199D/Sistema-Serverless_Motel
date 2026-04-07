@@ -6,6 +6,8 @@
     <title>Planilla | Motel Mil Amores</title>
     <link rel="stylesheet" href="estilo.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 </head>
 <body class="light-mode">
     <header>
@@ -18,6 +20,7 @@
         <nav>
             <a class="nav-btn active" href="index.html">Planilla</a>
             <a class="nav-btn" href="consultar-dia.html">Consultar día</a>
+            <a class="nav-btn" href="gestion.html">Gestionar historial</a>
             <a class="nav-btn" href="reportes.html">Reportes</a>
             <a class="nav-btn" href="pago.html">Pago QR</a>
         </nav>
@@ -37,8 +40,8 @@
             <div class="form-grid">
                 <input type="number" id="nroPza" placeholder="Nro Pieza">
                 <label class="checkbox-label"><input type="checkbox" id="acCheck"> A/C ❄️</label>
-                <input type="number" id="adelanto" placeholder="Adelanto Bs" value="Adelanto_BS">
-                <button onclick="registrarEntrada()" class="btn btn-primary">REGISTRAR ENTRADA</button>
+                <input type="number" id="adelanto" placeholder="Adelanto Bs" value="0">
+                <button onclick="registrarEntrada()" class="btn btn-primary" autofocus>REGISTRAR ENTRADA</button>
             </div>
         </section>
 
@@ -76,7 +79,7 @@
             
             <h3 class="precio-total">TOTAL A PAGAR: <span id="m-total"></span></h3>
             <button onclick="procesarSalida()" class="btn btn-primary">DESPACHAR</button>
-            <button onclick="document.getElementById('modalSalida').close()" class="btn">Cerrar</button>
+            <button onclick="document.getElementById('modalSalida').close()" class="btn" autofocus>Cerrar</button>
         </div>
     </dialog>
 
@@ -102,9 +105,20 @@
             <label class="checkbox-label"><input type="checkbox" id="edit-ac"> A/C ❄️</label>
             <button onclick="guardarEdicion()" class="btn btn-primary">GUARDAR</button>
             <button onclick="eliminarRegistro()" class="btn btn-danger">ELIMINAR</button>
-            <button onclick="document.getElementById('modalEditar').close()" class="btn">Cerrar</button>
+            <button onclick="document.getElementById('modalEditar').close()" class="btn" autofocus>Cerrar</button>
         </div>
     </dialog>
+
+    <dialog id="modalConfirmar" class="modal-confirm">
+    <div class="modal-content" style="text-align:center;">
+        <h3>¿Confirmar Salida?</h3>
+        <p>Se guardará el registro y la habitación pasará a estado <b>sucia</b>.</p>
+        <div style="display:flex; gap:10px; margin-top:20px; justify-content:center;">
+            <button id="btnConfirmarFinal" class="btn btn-primary">SÍ, DESPACHAR</button>
+            <button onclick="document.getElementById('modalConfirmar').close()" class="btn">CANCELAR</button>
+        </div>
+    </div>
+</dialog>
     
     <script src="app.js"></script>
 </body>

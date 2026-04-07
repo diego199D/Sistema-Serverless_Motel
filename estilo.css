@@ -634,3 +634,107 @@ main > *:nth-child(4) { animation-delay: 0.22s; }
   .pzas-grid { grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); }
   dialog { padding: 28px 26px; }
 }
+
+
+
+/* --- ESTILOS SECCIÓN CUADERNO (VERSIÓN COLUMNA MODERNA) --- */
+/* =============================================================================== */
+/* --- DISEÑO PREMIUM DEL CUADERNO --- */
+/* --- DISEÑO VIVO Y COMPACTO DEL CUADERNO --- */
+.cuaderno-container { margin: 15px auto; max-width: 320px; }
+
+.cuaderno-details {
+    background: var(--bg-card);
+    border-radius: 20px;
+    border: 2px solid #ffb129; /* Borde de color constante */
+    box-shadow: 0 8px 20px rgba(255, 177, 41, 0.2);
+    overflow: hidden;
+}
+
+.cuaderno-summary {
+    padding: 12px 20px;
+    cursor: pointer;
+    background: #ffb129;
+    color: #fff;
+    font-weight: 900;
+    list-style: none;
+    text-align: center;
+}
+
+.cuaderno-body { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+
+/* Etiquetas con color */
+.cuaderno-field label {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-left: 5px;
+}
+
+/* Inputs con colores específicos */
+.minimal-input {
+    border: 2px solid #eee;
+    border-radius: 12px;
+    padding: 10px;
+    font-weight: 700;
+    transition: 0.3s;
+}
+
+.select-color { border-color: #a3daff; background: #f0f8ff; }
+.monto-color { border-color: #b5ffd1; background: #f0fff5; }
+.time-color { border-color: #ffd1fa; background: #fff0fe; }
+
+/* Card de AC (Tocar todo el recuadro) */
+.cuaderno-field-ac-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #eef6ff;
+    padding: 12px 15px;
+    border-radius: 12px;
+    border: 2px solid #3a8dff;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.cuaderno-field-ac-card:active { transform: scale(0.96); }
+
+.ac-text { color: #0056b3; font-weight: 800; font-size: 0.85rem; }
+
+/* Botón Amarillo Pequeño y Potente */
+.btn-zaz-small {
+    background: #ffcc00;
+    color: #000;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 50px; /* Redondeado total */
+    font-weight: 900;
+    font-size: 0.85rem;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #ccaa00; /* Efecto 3D */
+    transition: 0.1s;
+}
+
+.btn-zaz-small:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #ccaa00;
+}
+
+/* --- ADAPTACIÓN DARK MODE (NOCHE) --- */
+body.dark-mode .cuaderno-details { border-color: #ffb129; background: #1a1a1a; }
+
+body.dark-mode .select-color, 
+body.dark-mode .monto-color, 
+body.dark-mode .time-color {
+    background: #252525;
+    color: #fff;
+    border-width: 2px;
+}
+
+body.dark-mode .cuaderno-field-ac-card {
+    background: #001a33;
+    border-color: #0066ff;
+}
+body.dark-mode .ac-text { color: #80bfff; }
+
