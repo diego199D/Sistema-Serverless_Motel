@@ -8,6 +8,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<!-- para pwa manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffb129">
 </head>
 <body class="light-mode">
     <header>
@@ -123,3 +126,13 @@
     <script src="app.js"></script>
 </body>
 </html>
+<!-- script del pwa -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('PWA lista y registrada', reg))
+        .catch(err => console.log('Error al registrar PWA', err));
+    });
+  }
+</script>

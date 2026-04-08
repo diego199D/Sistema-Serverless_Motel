@@ -10,17 +10,38 @@ const formatTime = (dateStr) => {
     return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase();
 };
 
+
+
 document.addEventListener('DOMContentLoaded', () => {
-    //document.body.classList.add('dark-mode');
+    // 1. REVISAR SI EL MODO OSCURO ESTABA GUARDADO
+    if (localStorage.getItem('dark-mode') === 'true') {
+        document.body.classList.add('dark-mode');
+    }
+
     const drawer = document.getElementById('drawer');
     const overlay = document.getElementById('overlay');
     const menuToggle = document.getElementById('menu-toggle');
+    
     if (menuToggle && drawer) {
-        menuToggle.addEventListener('click', (e) => { e.stopPropagation(); drawer.classList.add('open'); overlay.classList.add('open'); });
-        overlay.addEventListener('click', () => { drawer.classList.remove('open'); overlay.classList.remove('open'); });
+        menuToggle.addEventListener('click', (e) => { 
+            e.stopPropagation(); 
+            drawer.classList.add('open'); 
+            overlay.classList.add('open'); 
+        });
+        overlay.addEventListener('click', () => { 
+            drawer.classList.remove('open'); 
+            overlay.classList.remove('open'); 
+        });
     }
+
     const themeBtn = document.getElementById('theme-toggle');
-    if (themeBtn) { themeBtn.onclick = () => { document.body.classList.toggle('dark-mode'); }; }
+    if (themeBtn) { 
+        themeBtn.onclick = () => { 
+            // 2. CAMBIAR Y GUARDAR EL ESTADO EN EL NAVEGADOR
+            const isDark = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('dark-mode', isDark);
+        }; 
+    }
     
     if (document.getElementById('grid-limpias')) cargarDatos();
     if (document.getElementById('resultado-consulta')) consultarFecha();
@@ -1373,3 +1394,27 @@ async function insertarDatoCuaderno() {
         alert("Error al guardar");
     }
 }
+
+
+
+// ===============================================================================
+// --- SINCRONIZACIÓN TOTAL PARA EL PWA ---========================================
+//================================================================================
+
+// Escuchar cambios en Habitaciones (Limpieza/Sucia)
+_supabase
+  .channel('cambios-habitaciones')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'habitaciones' }, (payload) => {
+      console.log('Cambio en habitación:', payload);
+      cargarDatos(); 
+  })
+  .subscribe();
+
+// Escuchar cambios en Registros (Nuevas entradas/Salidas)
+_supabase
+  .channel('cambios-registros')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'registros' }, (payload) => {
+      console.log('Cambio en registros:', payload);
+      cargarDatos();
+  })
+  .subscribe();
