@@ -87,7 +87,7 @@ async function cargarDatos() {
                     <small>Entrada: ${formatTime(r.entrada)}</small></div>
                     <div style="${r.pago_adelantado > 0 ? 'color: var(--limpia);' : 'color: var(--sucia);'} font-size: 0.8rem;">Pagado: ${parseFloat(r.pago_adelantado).toFixed(2)}bs</div>
                     <div>
-                        <button class="btn btn-accent btn-sm" onclick="abrirEditar('${r.id}', '${r.entrada}', ${r.habitaciones.nro_pieza}, ${r.ac})">✏️</button>
+                        <button class="btn btn-accent btn-sm" onclick="abrirEditar('${r.id}', '${r.entrada}', ${r.habitaciones.nro_pieza}, ${r.ac}, ${r.pago_adelantado})">✏️</button>
                         <button class="btn btn-primary btn-sm" onclick="abrirSalida('${r.id}', '${r.habitaciones.nro_pieza}', '${r.entrada}', ${r.pago_adelantado}, ${r.ac})">SALIDA</button>
                     </div>
                 </div>
@@ -808,11 +808,14 @@ async function ejecutarDespacho() {
 
 
 
-function abrirEditar(id, entrada, nro, ac) {
+function abrirEditar(id, entrada, nro, ac, adelanto) {
     document.getElementById('edit-id').value = id;
     document.getElementById('edit-old-nro').value = nro;
     document.getElementById('edit-nro').value = nro;
     document.getElementById('edit-ac').checked = ac;
+
+    document.getElementById('edit-adelanto').value = adelanto || 0;
+
     const d = new Date(entrada);
     // Fecha
     const yyyy = d.getFullYear();
@@ -840,6 +843,8 @@ async function guardarEdicion() {
     const oldNro = document.getElementById('edit-old-nro').value;
     const newNro = document.getElementById('edit-nro').value;
     const ac = document.getElementById('edit-ac').checked;
+
+    const nuevoAdelanto = parseFloat(document.getElementById('edit-adelanto').value) || 0;
 
     const fecha = document.getElementById('edit-fecha').value;
     let h = parseInt(document.getElementById('edit-hora-h').value) || 0;
@@ -881,9 +886,9 @@ async function guardarEdicion() {
 
             await _supabase.from('habitaciones').update({ estado: 'sucia' }).eq('id', oldHab.id);
             await _supabase.from('habitaciones').update({ estado: 'ocupada' }).eq('id', newHab.id);
-            await _supabase.from('registros').update({ habitacion_id: newHab.id, ac: ac, entrada }).eq('id', id);
+            await _supabase.from('registros').update({ habitacion_id: newHab.id, ac: ac, entrada, pago_adelantado: nuevoAdelanto }).eq('id', id);
         } else {
-            await _supabase.from('registros').update({ ac: ac, entrada }).eq('id', id);
+            await _supabase.from('registros').update({ ac: ac, entrada, pago_adelantado: nuevoAdelanto }).eq('id', id);
         }
 
         // Refrescamos los datos del dashboard
