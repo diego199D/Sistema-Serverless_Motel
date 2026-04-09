@@ -1423,3 +1423,13 @@ _supabase
       cargarDatos();
   })
   .subscribe();
+
+  // ... (Tus bloques de Realtime que ya tenías) ...
+
+// --- SOLUCIÓN PARA EL DESBLOQUEO DEL CELULAR ---
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        // Al desbloquear o volver a la pestaña, refrescamos todo
+        window.location.reload();
+    }
+});
