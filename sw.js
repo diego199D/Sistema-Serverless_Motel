@@ -2,6 +2,9 @@ const CACHE_NAME = 'motel-v2';
 const assets = [
   './',
   './index.html',
+  './calculadora/calculadora.html',
+  './calculadora/estiloCalculadora.css',
+  './calculadora/funcion.js',
   './consultar-dia.html',
   './gestion.html',
   './pago.html',

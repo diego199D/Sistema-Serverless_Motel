@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <link rel="stylesheet" href="estiloCalculadora.css">
+    <script src="funcion.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="icono.png" type="image/x-icon">
+    <title>Motel Mil Amores</title>
+</head>
+
+<body>
+
+<header style="display: flex; align-items: center; justify-content: space-between; padding: 10px 20px;">
+    <a href="../index.html" style="text-decoration: none; font-size: 1.5rem; color: white;">⬅️</a>
+    <h1 style="margin: 0; font-size: 1.2rem; color: white;">Volver a Planilla</h1>
+</header>
+
+    <div class="cajaPrincipal">
+        <div class="cabecera">
+            <h1>🕛MOTEL MIL AMORES</h1>
+            <P>Calcular tiempo y cuenta del cliente</P>
+        </div>
+        <div class="cajaElementos">
+            <h3>📥Hora de Entrada</h3>
+
+            <div class="entradas">
+                <div class="cajitaEntrada">
+                    <label>Hora</label>
+                    <input type="number" id="horaEntrada" min="1" max="12" maxlength="2" placeholder=" " inputmode="numeric">
+                </div>
+                <div class="cajitaEntrada">
+                    <label>Minutos</label>
+                    <input type="number" id="minutosEntrada" min="0" max="59" maxlength="2" placeholder=" " inputmode="numeric">
+                </div>
+                <div class="cajitaEntrada">
+                    <label>Periodo</label>
+                    <select id="periodoEntrada">
+                        <option value="AM"> </option>
+                        <option value="am">AM</option>
+                        <option value="pm">PM</option>
+                    </select>
+                </div>
+            </div>
+
+            <h3>📤Hora de salida</h3>
+
+            <div class="entradas">
+                <div class="cajitaEntrada">
+                    <label>Hora</label>
+                    <input type="number" id="horaSalida" min="1" max="12" maxlength="2" placeholder=" " inputmode="numeric">
+                </div>
+                <div class="cajitaEntrada">
+                    <label>Minutos</label>
+                    <input type="number" id="minutosSalida" min="0" max="59" maxlength="2" placeholder=" " inputmode="numeric">
+                </div>
+                <div class="cajitaEntrada">
+                    <label>Periodo</label>
+                    <select id="periodoSalida">
+                        <option value="AM"> </option>
+                        <option value="AM">AM</option>
+                        <option value="PM">PM</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="botonHoraActual">
+                <button id="horaActualBtn">Hora Actual</button>
+            </div>
+
+
+            <div class="cajaPrecio">
+                <h4>tarifa por hora ($)</h4>
+                <input type="text" id="inputTarifa" readonly>
+            </div>
+
+            <button id="calcularBtn">💰Calcular tiempo y Costo</button>
+
+            <div class="resultado" id="resultado" >
+                <h3>📋 Resultado</h3>
+                <div class="resultadoCaja">
+                    <p>Hora de entrada:</p>
+                    <p id="hrEntradaR">...</p>
+                </div>
+                <div class="resultadoCaja">
+                    <p>Hora de salida:</p>
+                    <p id="hrSalidaR">...</p>
+                </div>
+                <div class="resultadoCaja">
+                    <p>Tiempo Total:</p>
+                    <p id="totalTiempoR">...</p>
+                </div>
+                <div class="resultadoCaja">
+                    <p>Tarifa:</p>
+                    <p id="resultTarifa">...</p>
+                </div>
+                <div class="resultadoCaja" id="sinMargen">
+                    <p>Costo Total:</p>
+                    <p id="costoTotal">$...</p>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>Motel Mil Amores &copy; 2025 - Diseñada por Diego Toledo</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
