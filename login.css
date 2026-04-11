@@ -1,0 +1,143 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
+/* ══════════════════════════════════════
+   LOGIN CSS — Motel Mil Amores
+   Solo depende de este archivo + estilo.css
+══════════════════════════════════════ */
+
+.login-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Tarjeta principal */
+.login-card {
+  width: 100%;
+  max-width: 360px;
+  background: var(--surface);
+  border: 1px solid var(--border-vivid);
+  border-radius: 22px;
+  padding: 36px 28px 30px;
+  box-shadow: var(--shadow);
+  animation: loginFadeUp 0.4s ease both;
+}
+
+@keyframes loginFadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Logo */
+.login-logo-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.login-logo-img {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 20px;
+  border: 2px solid var(--border-vivid);
+}
+
+.login-logo-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.login-logo-sub {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-top: 2px;
+  text-align: center;
+}
+
+/* Etiquetas */
+.login-label {
+  display: block;
+  font-size: 0.70rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+  margin-top: 14px;
+}
+
+/* Inputs */
+.login-input {
+  width: 100%;
+  padding: 13px 15px;
+  background: var(--bg2);
+  border: 1.5px solid var(--border-vivid);
+  border-radius: 11px;
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.97rem;
+  font-weight: 600;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+}
+
+.login-input::placeholder {
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
+.login-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(90, 110, 177, 0.18);
+}
+
+/* Input con ícono de ojo */
+.login-input-wrap {
+  position: relative;
+}
+
+.login-eye {
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: var(--text-dim);
+  font-size: 16px;
+  user-select: none;
+  line-height: 1;
+}
+
+/* Botón principal */
+.login-btn {
+  width: 100%;
+  margin-top: 22px;
+  padding: 14px;
+  background: var(--primary);
+  color: #ffffff;
+  border: none;
+  border-radius: 11px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.93rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: filter 0.2s, transform 0.15s;
+}
+
+.login-btn:hover  { filter: brightness(1.12); }
+.login-btn:active { transform: scale(0.97); }

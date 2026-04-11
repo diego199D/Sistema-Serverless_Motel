@@ -738,3 +738,14 @@ body.dark-mode .cuaderno-field-ac-card {
 }
 body.dark-mode .ac-text { color: #80bfff; }
 
+
+/* boton de cerrar sesion */
+.btn-cerrar-sesion {
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 15px;
+  border: none;
+  margin-left: 17px;
+  background: var(--danger);
+  color: white;
+}

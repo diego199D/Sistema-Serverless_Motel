@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consultar día | Motel Mil Amores</title>
     <link rel="stylesheet" href="estilo.css">
+    <link rel="icon" href="icon-192.png">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
@@ -24,6 +25,13 @@
             <a class="nav-btn" href="gestion.html">📄  Gestionar historial</a>
             <a class="nav-btn" href="reportes.html">📊  Reportes</a>
             <a class="nav-btn active" href="pago.html">💵  Pago QR</a>
+            <br>
+            <br>
+            <br>
+            <br>
+            <button class="btn-cerrar-sesion" onclick="cerrarSesion()">
+                🚪 Cerrar Sesion
+            </button>
         </nav>
     </div>
     <div id="overlay" class="overlay"></div>

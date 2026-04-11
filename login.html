@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso - Motel</title>
+    <link rel="stylesheet" href="estilo.css">
+    <link rel="stylesheet" href="login.css">
+    <link rel="icon" href="icon-192.png">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <div class="login-page">
+        <div class="login-card">
+
+            <div class="login-logo-wrap">
+                <img class="login-logo-img" src="icon-192.png" alt="Logo del sistema" onerror="this.src='https://placehold.co/90x90/5a6eb1/ffffff?text=Logo'" />
+                <div>
+                    <div class="login-logo-title">Motel Mil Amores</div>
+                    <div class="login-logo-sub">Ingresa tus credenciales</div>
+                </div>
+            </div>
+
+            <form onsubmit="ejecutarLogin(event)">
+                
+                <label class="login-label" for="email">Correo electrónico</label>
+                <input class="login-input" type="email" id="email" placeholder="usuario@correo.com" autocomplete="email" required />
+
+                <label class="login-label" for="password">Contraseña</label>
+                <div class="login-input-wrap">
+                    <input class="login-input" type="password" id="password" placeholder="••••••••" style="padding-right: 42px;" autocomplete="current-password" required />
+                    <span class="login-eye" id="eye-btn" onclick="togglePwd()">👁</span>
+                </div>
+
+                <button type="submit" class="login-btn">Entrar al sistema</button>
+            </form>
+
+        </div>
+    </div>
+
+    <script>
+        const _supabase = supabase.createClient('https://nxaqzhmojgydoyhpbzfd.supabase.co', 'sb_publishable_S99rfoTFEw3IEWpRqdRdUg_RG_cES_D');
+
+        // Lógica para mostrar/ocultar contraseña
+        function togglePwd() {
+            const pwdInput = document.getElementById('password');
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+            } else {
+                pwdInput.type = 'password';
+            }
+        }
+
+        async function ejecutarLogin(event) {
+            event.preventDefault(); // Evita que la página recargue al dar Enter
+
+            const emailInput = document.getElementById('email');
+            const passInput = document.getElementById('password');
+
+            const { data, error } = await _supabase.auth.signInWithPassword({ 
+                email: emailInput.value, 
+                password: passInput.value 
+            });
+
+            if (error) {
+                Swal.fire({ icon: 'error', title: 'Acceso denegado', text: 'Correo o contraseña incorrectos', background: '#1a1a1a', color: '#fff' });
+                
+                // Limpiar los campos si hay error
+                emailInput.value = '';
+                passInput.value = '';
+                emailInput.focus(); // Pone el cursor en el correo de nuevo
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>

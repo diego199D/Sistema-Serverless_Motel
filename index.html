@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="icon" href="icon-192.png">
 <!-- para pwa manifest -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#5a6eb1">
@@ -27,6 +28,13 @@
             <a class="nav-btn" href="gestion.html">📄  Gestionar historial</a>
             <a class="nav-btn" href="reportes.html">📊  Reportes</a>
             <a class="nav-btn" href="pago.html">💵  Pago QR</a>
+            <br>
+            <br>
+            <br>
+            <br>
+            <button class="btn-cerrar-sesion" onclick="cerrarSesion()">
+                🚪 Cerrar Sesión
+            </button>
         </nav>
     </div>
     <div id="overlay" class="overlay"></div>
