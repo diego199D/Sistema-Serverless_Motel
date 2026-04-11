@@ -13,7 +13,9 @@ const assets = [
   './app.js',
   './icon-192.png',
   './icon-512.png',
-  './photo.jpg'
+  './photo.jpg',
+  './login.html',
+  './login.css',
 ];
 
 self.addEventListener('install', e => {
