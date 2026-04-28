@@ -949,3 +949,194 @@ document.addEventListener('visibilitychange', async () => {
         }
     }
 });
+
+
+
+
+
+
+
+//********************************************************************************** */
+// para gastos-------------------------------------------------------------------------
+//********************************************************************************** */
+// ===============================================================================
+// GASTOS
+// ===============================================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (!document.getElementById('fecha-gastos')) return;
+    const hoy = new Date();
+    document.getElementById('fecha-gastos').valueAsDate = hoy;
+    cargarGastos();
+});
+
+async function agregarGasto() {
+    const nombre = document.getElementById('gasto-nombre').value.trim();
+    const precio = parseFloat(document.getElementById('gasto-precio').value);
+
+    if (!nombre) {
+        Swal.fire({ icon: 'warning', title: 'Falta el nombre', width: '300px' });
+        return;
+    }
+    if (!precio || precio <= 0) {
+        Swal.fire({ icon: 'warning', title: 'Precio inválido', width: '300px' });
+        return;
+    }
+
+    const fecha = document.getElementById('fecha-gastos').value;
+
+    const { error } = await _supabase.from('gastos').insert([{ nombre, precio, fecha }]);
+
+    if (error) {
+        Swal.fire({ icon: 'error', title: 'Error', text: error.message, width: '300px' });
+        return;
+    }
+
+    document.getElementById('gasto-nombre').value = '';
+    document.getElementById('gasto-precio').value = '';
+
+    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Gasto registrado', showConfirmButton: false, timer: 1800, timerProgressBar: true });
+    cargarGastos();
+}
+
+async function cargarGastos() {
+    const fechaInput = document.getElementById('fecha-gastos');
+    if (!fechaInput || !fechaInput.value) return;
+
+    const fecha = new Date(fechaInput.value + 'T00:00:00');
+    const anio = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const desde = `${anio}-${mes}-01`;
+    const ultimoDia = new Date(anio, fecha.getMonth() + 1, 0).getDate();
+    const hasta = `${anio}-${mes}-${String(ultimoDia).padStart(2, '0')}`;
+
+    const { data, error } = await _supabase
+        .from('gastos')
+        .select('*')
+        .gte('fecha', desde)
+        .lte('fecha', hasta)
+        .order('fecha', { ascending: false });
+
+    const contenedor = document.getElementById('resultado-gastos');
+    if (!contenedor) return;
+
+    if (error) {
+        contenedor.innerHTML = `<p style="text-align:center;padding:20px;color:var(--danger);">Error: ${error.message}</p>`;
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        contenedor.innerHTML = `
+            <div class="gastos-vacio">
+                <p>💸</p>
+                <p>No hay gastos registrados este mes.</p>
+            </div>`;
+        return;
+    }
+
+    const total = data.reduce((sum, g) => sum + parseFloat(g.precio), 0);
+    const nombreMes = fecha.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+
+    let filas = data.map(g => {
+        const d = new Date(g.fecha + 'T00:00:00');
+        const fechaFormateada = d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+        return `
+            <tr>
+                <td>${fechaFormateada}</td>
+                <td style="font-weight:700;">${g.nombre}</td>
+                <td class="gastos-precio">Bs ${parseFloat(g.precio).toFixed(0)}</td>
+                <td style="text-align:center;padding:6px;">
+                    <button onclick="abrirEditarGasto('${g.id}','${g.nombre.replace(/'/g,"\\'")}',${g.precio},'${g.fecha}')" class="btn btn-accent" style="display:block;width:80%;margin-bottom:4px;padding:5px 8px;font-size:0.78rem;"> ✏️ </button>
+                    <button onclick="eliminarGasto('${g.id}')" class="btn btn-danger" style="display:block;width:80%;padding:5px 8px;font-size:0.78rem;"> 🗑️ </button> 
+                </td>
+            </tr>`;
+    }).join('');
+
+    contenedor.innerHTML = `
+        <div class="gastos-tabla-wrapper">
+            <div class="gastos-tabla-header">
+                <p>Gastos de ${nombreMes}</p>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Nombre</th>
+                        <th>Precio</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>${filas}</tbody>
+            </table>
+            <div class="gastos-total">TOTAL: Bs ${total.toFixed(2)}</div>
+        </div>`;
+}
+
+async function eliminarGasto(id) {
+    const result = await Swal.fire({
+        title: '¿Eliminar gasto?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6e7881',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        width: '300px'
+    });
+
+    if (!result.isConfirmed) return;
+
+    const { error } = await _supabase.from('gastos').delete().eq('id', id);
+
+    if (error) {
+        Swal.fire({ icon: 'error', title: 'Error', text: error.message, width: '300px' });
+        return;
+    }
+
+    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Eliminado', showConfirmButton: false, timer: 1500 });
+    cargarGastos();
+}
+
+
+//
+function abrirEditarGasto(id, nombre, precio, fecha) {
+    document.getElementById('egasto-id').value = id;
+    document.getElementById('egasto-nombre').value = nombre;
+    document.getElementById('egasto-precio').value = precio;
+    document.getElementById('egasto-fecha').value = fecha;
+    document.getElementById('modalEditarGasto').showModal();
+}
+
+async function guardarEdicionGasto() {
+    const id = document.getElementById('egasto-id').value;
+    const nombre = document.getElementById('egasto-nombre').value.trim();
+    const precio = parseFloat(document.getElementById('egasto-precio').value);
+    const fecha = document.getElementById('egasto-fecha').value;
+
+    if (!nombre) {
+        Swal.fire({ icon: 'warning', title: 'Falta el nombre', width: '300px' });
+        return;
+    }
+    if (!precio || precio <= 0) {
+        Swal.fire({ icon: 'warning', title: 'Precio inválido', width: '300px' });
+        return;
+    }
+    if (!fecha) {
+        Swal.fire({ icon: 'warning', title: 'Falta la fecha', width: '300px' });
+        return;
+    }
+
+    const { error } = await _supabase
+        .from('gastos')
+        .update({ nombre, precio, fecha })
+        .eq('id', id);
+
+    if (error) {
+        Swal.fire({ icon: 'error', title: 'Error', text: error.message, width: '300px' });
+        return;
+    }
+
+    document.getElementById('modalEditarGasto').close();
+    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Gasto actualizado', showConfirmButton: false, timer: 1800, timerProgressBar: true });
+    cargarGastos();
+}
