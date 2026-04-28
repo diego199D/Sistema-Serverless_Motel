@@ -354,32 +354,51 @@ async function generarReporte() {
     const inicio = document.getElementById('fecha-inicio').value;
     const fin = document.getElementById('fecha-fin').value;
     if (!inicio || !fin) return alert("Selecciona rango de fechas");
-    
+
+    // +1 día al fin para cubrir el offset Bolivia (UTC-4)
+    const finMasUno = new Date(fin + 'T00:00:00');
+    finMasUno.setDate(finMasUno.getDate() + 1);
+    const finISO = finMasUno.toISOString();
+    const inicioISO = new Date(inicio + 'T00:00:00').toISOString();
+
     const { data, error } = await _supabase.from('registros')
         .select('*, habitaciones(nro_pieza)')
         .not('salida', 'is', null)
+        .gte('entrada', inicioISO)
+        .lte('entrada', finISO)
         .order('entrada', { ascending: true });
-        
+
     if (error) return console.error(error);
-    
+
+    // Filtro fino en JS con toLocaleDateString igual que el resto del proyecto
     datosReporteGlobal = data.filter(r => {
         const d = new Date(r.entrada).toLocaleDateString('en-CA');
         return d >= inicio && d <= fin;
     });
+
+    // Traer gastos del rango
+    const { data: gastos } = await _supabase
+        .from('gastos')
+        .select('precio')
+        .gte('fecha', inicio)
+        .lte('fecha', fin);
+
+    window.totalGastosReporte = gastos
+        ? gastos.reduce((sum, g) => sum + parseFloat(g.precio), 0)
+        : 0;
 
     if (datosReporteGlobal.length === 0) {
         document.getElementById('resultado-reporte').innerHTML = "No hay registros.";
         return;
     }
 
-    fechasDisponibles = [...new Set(datosReporteGlobal.map(r => 
+    fechasDisponibles = [...new Set(datosReporteGlobal.map(r =>
         new Date(r.entrada).toLocaleDateString('en-CA')
     ))];
-    
-    indiceFechaActual = 0; 
+
+    indiceFechaActual = 0;
     mostrarDiaEnReporte();
 }
-
 
 
 
@@ -481,6 +500,16 @@ function exportarPDF() {
     doc.setFillColor(230, 250, 230); doc.roundedRect(136, 30, 60, 22, 2, 2, 'FD');
     doc.setTextColor(0, 100, 0); doc.setFontSize(8); doc.text("TOTAL RECAUDADO", 140, 36); doc.setFontSize(13); doc.text(`${granTotal.toFixed(2)} bs`, 140, 45);
 
+    // Fila 2: Gastos (naranja) y Ganancia neta (lila)
+    const totalGastos = window.totalGastosReporte || 0;
+    const gananciaNeta = granTotal - totalGastos;
+
+    doc.setFillColor(255, 220, 180); doc.roundedRect(14, 57, 85, 22, 2, 2, 'FD');
+    doc.setTextColor(180, 80, 0); doc.setFontSize(8); doc.text("TOTAL GASTOS", 18, 63); doc.setFontSize(13); doc.text(`${totalGastos.toFixed(2)} bs`, 18, 72);
+
+    doc.setFillColor(225, 210, 255); doc.roundedRect(105, 57, 91, 22, 2, 2, 'FD');
+    doc.setTextColor(80, 0, 160); doc.setFontSize(8); doc.text("GANANCIA NETA", 109, 63); doc.setFontSize(13); doc.text(`${gananciaNeta.toFixed(2)} bs`, 109, 72);
+
     const grupos = {};
     window.reporteData.forEach(r => {
         const fecha = new Date(r.entrada).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -498,7 +527,7 @@ function exportarPDF() {
     }
 
     doc.autoTable({
-        startY: 60,
+        startY: 88,
         head: [['Habitacion', 'Entrada', 'Salida', 'Aire', 'Cobro']],
         body: rows,
         theme: 'grid',
