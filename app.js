@@ -1224,7 +1224,7 @@ async function cargarDashboard() {
     // ── Query registros del mes ──────────────────────────────────────────────
     const { data: registros } = await _supabase
         .from('registros')
-        .select('entrada, ac, monto_total')
+        .select('entrada, ac, monto_total, pago_adelantado')
         .not('salida', 'is', null)
         .gte('entrada', desdeISO)
         .lte('entrada', hastaISO);
@@ -1236,7 +1236,7 @@ async function cargarDashboard() {
 
     const totalClientes = registrosMes.length;
     const totalAC = registrosMes.filter(r => r.ac).length;
-    const totalIngresos = registrosMes.reduce((s, r) => s + (parseFloat(r.monto_total) || 0), 0);
+    const totalIngresos = registrosMes.reduce((s, r) => s + (parseFloat(r.monto_total || 0) + parseFloat(r.pago_adelantado || 0)), 0);
 
     // ── Query gastos del mes ─────────────────────────────────────────────────
     const { data: gastos } = await _supabase
