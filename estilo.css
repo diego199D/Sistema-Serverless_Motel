@@ -891,3 +891,101 @@ body.dark-mode .gasto-input.precio-color { border-color: #1a4e30; }
 }
 .gastos-vacio p:first-child { font-size: 2rem; }
 .gastos-vacio p:last-child { color: var(--text-muted); font-weight: 600; margin-top: 8px; }
+
+
+
+/* ************************************************************************************************************************ */
+/* ***************************************************************************************************************************** */
+/* ══════════════════════════════════════
+   DASHBOARD — Pegar al final de estilo.css
+══════════════════════════════════════ */
+
+.dash-mes-label {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 10px 0 4px;
+}
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 10px 14px;
+}
+
+.dash-card {
+  border-radius: var(--radius);
+  padding: 18px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ocupa las 2 columnas */
+.dash-card-wide {
+  grid-column: span 2;
+}
+
+.dash-card-icon {
+  font-size: 1.5rem;
+  margin-bottom: 2px;
+}
+
+.dash-card-valor {
+  font-size: 1.6rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.dash-card-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+/* Colores de tarjetas */
+.dash-card-blue   { background: #dce6ff; color: #1a2f7a; }
+.dash-card-cyan   { background: #d0f4f7; color: #0a4f58; }
+.dash-card-green  { background: #d4f5e2; color: #0a4d28; }
+.dash-card-orange { background: #ffe8cc; color: #7a3500; }
+.dash-card-purple { background: #ece0ff; color: #3d0a7a; }
+
+body.dark-mode .dash-card-blue   { background: #1a2550; color: #adbfff; }
+body.dark-mode .dash-card-cyan   { background: #0d3038; color: #80dde8; }
+body.dark-mode .dash-card-green  { background: #0d3020; color: #7eeaaa; }
+body.dark-mode .dash-card-orange { background: #3d2000; color: #ffbb77; }
+body.dark-mode .dash-card-purple { background: #250a40; color: #c49fff; }
+
+/* Gráfica */
+.dash-chart-wrapper {
+  margin: 6px 14px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.dash-chart-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 14px;
+}
+
+#dash-chart {
+  max-height: 220px;
+}

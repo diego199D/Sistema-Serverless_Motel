@@ -1172,3 +1172,172 @@ async function guardarEdicionGasto() {
     Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Gasto actualizado', showConfirmButton: false, timer: 1800, timerProgressBar: true });
     cargarGastos();
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------------
+// ===============================================================================
+// DASHBOARD
+// ===============================================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (!document.getElementById('dash-clientes')) return;
+    cargarDashboard();
+});
+
+async function cargarDashboard() {
+    const hoy = new Date();
+    const anio = hoy.getFullYear();
+    const mes = hoy.getMonth(); // 0-indexed
+
+    // Rango del mes actual
+    const desdeStr = `${anio}-${String(mes + 1).padStart(2,'0')}-01`;
+    const ultimoDia = new Date(anio, mes + 1, 0).getDate();
+    const hastaStr = `${anio}-${String(mes + 1).padStart(2,'0')}-${String(ultimoDia).padStart(2,'0')}`;
+
+    // Para la query con offset Bolivia (UTC-4)
+    const desdeISO = new Date(desdeStr + 'T00:00:00').toISOString();
+    const hastaConMargen = new Date(anio, mes + 1, 1); // primer día del mes siguiente
+    hastaConMargen.setDate(hastaConMargen.getDate() + 1);
+    const hastaISO = hastaConMargen.toISOString();
+
+    // Label del mes
+    const nombreMes = hoy.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+    document.getElementById('dash-mes-label').textContent =
+        nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1);
+
+    // ── Query registros del mes ──────────────────────────────────────────────
+    const { data: registros } = await _supabase
+        .from('registros')
+        .select('entrada, ac, monto_total')
+        .not('salida', 'is', null)
+        .gte('entrada', desdeISO)
+        .lte('entrada', hastaISO);
+
+    const registrosMes = (registros || []).filter(r => {
+        const d = new Date(r.entrada).toLocaleDateString('en-CA');
+        return d >= desdeStr && d <= hastaStr;
+    });
+
+    const totalClientes = registrosMes.length;
+    const totalAC = registrosMes.filter(r => r.ac).length;
+    const totalIngresos = registrosMes.reduce((s, r) => s + (parseFloat(r.monto_total) || 0), 0);
+
+    // ── Query gastos del mes ─────────────────────────────────────────────────
+    const { data: gastos } = await _supabase
+        .from('gastos')
+        .select('precio')
+        .gte('fecha', desdeStr)
+        .lte('fecha', hastaStr);
+
+    const totalGastos = (gastos || []).reduce((s, g) => s + parseFloat(g.precio), 0);
+    const gananciaNeta = totalIngresos - totalGastos;
+
+    // ── Actualizar tarjetas ──────────────────────────────────────────────────
+    document.getElementById('dash-clientes').textContent = totalClientes;
+    document.getElementById('dash-ac').textContent = totalAC;
+    document.getElementById('dash-ingresos').textContent = `Bs ${totalIngresos.toFixed(0)}`;
+    document.getElementById('dash-gastos').textContent = `Bs ${totalGastos.toFixed(0)}`;
+    document.getElementById('dash-neta').textContent = `Bs ${gananciaNeta.toFixed(0)}`;
+
+    // ── Gráfica últimos 4 meses ──────────────────────────────────────────────
+    await cargarGraficaDashboard(anio, mes);
+}
+
+async function cargarGraficaDashboard(anioActual, mesActual) {
+    const labels = [];
+    const valores = [];
+
+    for (let i = 3; i >= 0; i--) {
+        let m = mesActual - i;
+        let a = anioActual;
+        if (m < 0) { m += 12; a -= 1; }
+
+        const desdeStr = `${a}-${String(m + 1).padStart(2,'0')}-01`;
+        const ultimoDia = new Date(a, m + 1, 0).getDate();
+        const hastaStr = `${a}-${String(m + 1).padStart(2,'0')}-${String(ultimoDia).padStart(2,'0')}`;
+
+        const desdeISO = new Date(desdeStr + 'T00:00:00').toISOString();
+        const hastaConMargen = new Date(a, m + 1, 1);
+        hastaConMargen.setDate(hastaConMargen.getDate() + 1);
+        const hastaISO = hastaConMargen.toISOString();
+
+        const { data } = await _supabase
+            .from('registros')
+            .select('entrada')
+            .not('salida', 'is', null)
+            .gte('entrada', desdeISO)
+            .lte('entrada', hastaISO);
+
+        const count = (data || []).filter(r => {
+            const d = new Date(r.entrada).toLocaleDateString('en-CA');
+            return d >= desdeStr && d <= hastaStr;
+        }).length;
+
+        const nombreMes = new Date(a, m, 1).toLocaleDateString('es-ES', { month: 'short' });
+        labels.push(nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1));
+        valores.push(count);
+    }
+
+    const isDark = document.body.classList.contains('dark-mode');
+    const textColor = isDark ? '#c8cfe8' : '#555e7a';
+    const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
+
+    const ctx = document.getElementById('dash-chart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Clientes',
+                data: valores,
+                borderColor: '#5a6eb1',
+                backgroundColor: 'rgba(90,110,177,0.12)',
+                borderWidth: 2.5,
+                pointBackgroundColor: '#5a6eb1',
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                fill: true,
+                tension: 0.35
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ` ${ctx.parsed.y} clientes`
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: textColor, font: { weight: '700' } },
+                    grid: { color: gridColor }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: textColor, stepSize: 1, precision: 0 },
+                    grid: { color: gridColor }
+                }
+            }
+        }
+    });
+}

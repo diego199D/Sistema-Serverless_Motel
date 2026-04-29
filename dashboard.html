@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Motel Mil Amores</title>
+    <link rel="stylesheet" href="estilo.css">
+    <link rel="icon" href="icon-192.png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="light-mode">
+    <header>
+        <button id="menu-toggle" class="hamburger">☰</button>
+        <h1>Dashboard</h1>
+        <button id="theme-toggle">🌗</button>
+    </header>
+
+    <div id="drawer" class="drawer">
+        <nav>
+            <a class="nav-btn active" href="dashboard.html">📊  Dashboard</a>
+            <a class="nav-btn" href="index.html">📋  Planilla</a>
+            <a class="nav-btn" href="calculadora/calculadora.html">🕘  Calculadora</a>
+            <a class="nav-btn" href="consultar-dia.html">⛅  Consultar día</a>
+            <a class="nav-btn" href="gestion.html">📄  Gestionar historial</a>
+            <a class="nav-btn" href="gastos.html">💸  Gastos</a>
+            <a class="nav-btn" href="reportes.html">📆  Reportes</a>
+            <a class="nav-btn" href="pago.html">💵  Pago QR</a>
+            <br><br><br><br>
+            <button class="btn-cerrar-sesion" onclick="cerrarSesion()">
+                🚪 Cerrar Sesion
+            </button>
+        </nav>
+    </div>
+    <div id="overlay" class="overlay"></div>
+
+    <main>
+        <!-- Mes actual -->
+        <div class="dash-mes-label" id="dash-mes-label">Cargando...</div>
+
+        <!-- Tarjetas -->
+        <div class="dash-grid">
+            <div class="dash-card dash-card-blue">
+                <span class="dash-card-icon">👥</span>
+                <span class="dash-card-valor" id="dash-clientes">—</span>
+                <span class="dash-card-label">Clientes del mes</span>
+            </div>
+            <div class="dash-card dash-card-cyan">
+                <span class="dash-card-icon">❄️</span>
+                <span class="dash-card-valor" id="dash-ac">—</span>
+                <span class="dash-card-label">Usaron A/C</span>
+            </div>
+            <div class="dash-card dash-card-green">
+                <span class="dash-card-icon">💵</span>
+                <span class="dash-card-valor" id="dash-ingresos">—</span>
+                <span class="dash-card-label">Total generado</span>
+            </div>
+            <div class="dash-card dash-card-orange">
+                <span class="dash-card-icon">💸</span>
+                <span class="dash-card-valor" id="dash-gastos">—</span>
+                <span class="dash-card-label">Total gastos</span>
+            </div>
+            <div class="dash-card dash-card-purple dash-card-wide">
+                <span class="dash-card-icon">📈</span>
+                <span class="dash-card-valor" id="dash-neta">—</span>
+                <span class="dash-card-label">Ganancia neta</span>
+            </div>
+        </div>
+
+        <!-- Gráfica -->
+        <div class="dash-chart-wrapper">
+            <p class="dash-chart-title">Clientes — últimos 4 meses</p>
+            <canvas id="dash-chart"></canvas>
+        </div>
+    </main>
+
+    <script src="app.js?v=2"></script>
+</body>
+</html>
