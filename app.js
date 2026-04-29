@@ -995,7 +995,10 @@ document.addEventListener('visibilitychange', async () => {
 document.addEventListener('DOMContentLoaded', () => {
     if (!document.getElementById('fecha-gastos')) return;
     const hoy = new Date();
-    document.getElementById('fecha-gastos').valueAsDate = hoy;
+    const anio = hoy.getFullYear();
+    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoy.getDate()).padStart(2, '0');
+    document.getElementById('fecha-gastos').value = `${anio}-${mes}-${dia}`;
     cargarGastos();
 });
 
