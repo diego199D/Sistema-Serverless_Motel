@@ -1257,6 +1257,8 @@ async function cargarDashboard() {
 
     // ── Gráfica últimos 4 meses ──────────────────────────────────────────────
     await cargarGraficaDashboard(anio, mes);
+    //graficar los ultimos 5 dias:
+    await cargarGraficaSemanal();
 }
 
 async function cargarGraficaDashboard(anioActual, mesActual) {
@@ -1325,6 +1327,81 @@ async function cargarGraficaDashboard(anioActual, mesActual) {
                     callbacks: {
                         label: ctx => ` ${ctx.parsed.y} clientes`
                     }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: textColor, font: { weight: '700' } },
+                    grid: { color: gridColor }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: textColor, stepSize: 1, precision: 0 },
+                    grid: { color: gridColor }
+                }
+            }
+        }
+    });
+}
+
+//grafica par semana
+async function cargarGraficaSemanal() {
+    const labels = [];
+    const valores = [];
+
+    for (let i = 4; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const anio = d.getFullYear();
+        const mes = String(d.getMonth() + 1).padStart(2, '0');
+        const dia = String(d.getDate()).padStart(2, '0');
+        const fechaStr = `${anio}-${mes}-${dia}`;
+
+        const desdeISO = new Date(fechaStr + 'T00:00:00').toISOString();
+        const hastaD = new Date(fechaStr + 'T00:00:00');
+        hastaD.setDate(hastaD.getDate() + 1);
+        const hastaISO = hastaD.toISOString();
+
+        const { data } = await _supabase
+            .from('registros')
+            .select('entrada')
+            .not('salida', 'is', null)
+            .gte('entrada', desdeISO)
+            .lte('entrada', hastaISO);
+
+        const count = (data || []).filter(r => {
+            return new Date(r.entrada).toLocaleDateString('en-CA') === fechaStr;
+        }).length;
+
+        const nombreDia = d.toLocaleDateString('es-ES', { weekday: 'short', day: '2-digit' });
+        labels.push(nombreDia.charAt(0).toUpperCase() + nombreDia.slice(1));
+        valores.push(count);
+    }
+
+    const isDark = document.body.classList.contains('dark-mode');
+    const textColor = isDark ? '#c8cfe8' : '#555e7a';
+    const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
+
+    const ctx = document.getElementById('dash-chart-semanal').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Clientes',
+                data: valores,
+                backgroundColor: 'rgba(90,110,177,0.75)',
+                borderRadius: 6,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: { label: ctx => ` ${ctx.parsed.y} clientes` }
                 }
             },
             scales: {
