@@ -114,8 +114,8 @@ async function cargarDatos() {
         ]);
 
         const limpias = habitaciones.data.filter(h => h.estado === 'limpia');
-        document.getElementById('grid-limpias').innerHTML = limpias.length > 0 
-            ? limpias.map(h => `<div class="circulo limpia animate__animated animate__fadeIn">${h.nro_pieza}</div>`).join('')
+        document.getElementById('grid-limpias').innerHTML = limpias.length > 0
+            ? limpias.map(h => `<div class="circulo limpia animate__animated animate__fadeIn" onclick="abrirModalEntrada('${h.id}', '${h.nro_pieza}')" style="cursor:pointer;">${h.nro_pieza}</div>`).join('')
             : '<small></small>';
         
         const sucias = habitaciones.data.filter(h => h.estado === 'sucia');
@@ -857,6 +857,7 @@ async function registrarEntrada() {
             _supabase.from('registros').insert([{ habitacion_id: hab.id, pago_adelantado: adelanto, ac: tieneAC }])
         ]);
         document.getElementById('nroPza').value = ''; document.getElementById('adelanto').value = '0'; document.getElementById('acCheck').checked = false;
+        if (document.getElementById('modalEntrada')) document.getElementById('modalEntrada').close();
         cargarDatos();
         Swal.fire({
             title: '¡INGRESADO!', html: `<div style="font-size: 3.5rem;">💑</div><p style="margin-top:10px; font-weight:bold;">¡Buen turno!</p>`, width: '300px', timer: 2000, showConfirmButton: false,
@@ -864,6 +865,14 @@ async function registrarEntrada() {
             background: document.body.classList.contains('dark-mode') ? '#1a1a1a' : '#fff', color: document.body.classList.contains('dark-mode') ? '#fff' : '#000'
         });
     } catch (error) { Swal.fire('Error', 'No se pudo registrar: ' + error.message, 'error'); }
+}
+
+function abrirModalEntrada(id, nro) {
+    document.getElementById('nroPza').value = nro;
+    document.getElementById('entrada-nro-display').innerText = nro;
+    document.getElementById('adelanto').value = '0';
+    document.getElementById('acCheck').checked = false;
+    document.getElementById('modalEntrada').showModal();
 }
 
 function abrirConfirmacionLimpieza(id, nro) {
