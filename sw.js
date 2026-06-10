@@ -1,4 +1,4 @@
-const CACHE_NAME = 'motel-v2';
+const CACHE_NAME = 'motel-v3';
 const assets = [
   './',
   './index.html',
