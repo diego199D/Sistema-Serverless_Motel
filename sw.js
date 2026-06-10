@@ -1,4 +1,4 @@
-const CACHE_NAME = 'motel-v5';
+const CACHE_NAME = 'motel-v6';
 
 const IMAGENES_ESTATICAS = [
   './icon-192.png',

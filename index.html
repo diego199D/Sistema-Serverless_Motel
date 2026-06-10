@@ -12,6 +12,36 @@
 <!-- para pwa manifest -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#5a6eb1">
+<style>
+  .ac-toggle-card {
+    display:flex; align-items:center; gap:14px;
+    padding:14px 16px; border-radius:14px;
+    border:2px solid #ddd; background:#f5f5f5;
+    cursor:pointer; transition:all 0.2s;
+    margin-bottom:14px; user-select:none;
+  }
+  .ac-toggle-card:active { transform:scale(0.97); }
+  .ac-toggle-icon { font-size:2rem; filter:grayscale(1); transition:filter 0.25s; }
+  .ac-toggle-title { font-weight:800; font-size:0.9rem; color:#aaa; transition:color 0.2s; }
+  .ac-toggle-sub { font-size:0.72rem; color:#ccc; transition:color 0.2s; margin-top:2px; }
+  .ac-toggle-pill { width:38px; height:22px; border-radius:11px; background:#ddd; position:relative; transition:background 0.25s; flex-shrink:0; }
+  .ac-toggle-thumb { position:absolute; width:17px; height:17px; border-radius:50%; background:#fff; top:2.5px; left:2px; transition:left 0.25s; box-shadow:0 1px 4px rgba(0,0,0,0.25); }
+
+  #acCheck:checked + .ac-toggle-card { border-color:#3a8dff; background:#eef6ff; box-shadow:0 0 0 3px rgba(58,141,255,0.15); }
+  #acCheck:checked + .ac-toggle-card .ac-toggle-icon { filter:grayscale(0); }
+  #acCheck:checked + .ac-toggle-card .ac-toggle-title { color:#0056b3; }
+  #acCheck:checked + .ac-toggle-card .ac-toggle-sub { color:#4a90d9; }
+  #acCheck:checked + .ac-toggle-card .ac-toggle-pill { background:#3a8dff; }
+  #acCheck:checked + .ac-toggle-card .ac-toggle-thumb { left:19px; }
+
+  body.dark-mode .ac-toggle-card { background:#2a2a2a; border-color:#3a3a3a; }
+  body.dark-mode .ac-toggle-title { color:#555; }
+  body.dark-mode .ac-toggle-sub { color:#444; }
+  body.dark-mode .ac-toggle-pill { background:#3a3a3a; }
+  body.dark-mode #acCheck:checked + .ac-toggle-card { background:#001a33; border-color:#0066ff; box-shadow:0 0 0 3px rgba(0,102,255,0.2); }
+  body.dark-mode #acCheck:checked + .ac-toggle-card .ac-toggle-title { color:#80bfff; }
+  body.dark-mode #acCheck:checked + .ac-toggle-card .ac-toggle-sub { color:#5599dd; }
+</style>
 </head>
 <body class="light-mode">
     <header>
@@ -54,22 +84,42 @@
     </main>
 
     <!-- Modal Entrada desde cuadro verde -->
-    <dialog id="modalEntrada">
-        <div class="modal-content">
-            <h3>Nueva Entrada</h3>
-            <p style="margin-bottom:18px; text-align:center;">
-                <span style="display:block; font-size:0.75rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:4px;">Pieza</span>
-                <strong id="entrada-nro-display" style="font-size:3.5rem; font-weight:900; color:#5a9fd4; line-height:1;"></strong>
-            </p>
-            <input type="hidden" id="nroPza">
-            <label class="checkbox-label" style="margin-bottom:14px; display:flex; align-items:center; gap:8px;">
-                <input type="checkbox" id="acCheck"> A/C ❄️
-            </label>
-            <input type="number" id="adelanto" placeholder="Adelanto Bs" value="0"
-                style="width:100%;padding:13px 16px;background:var(--bg2);border:1.5px solid var(--border-vivid);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:1rem;font-weight:600;outline:none;margin-bottom:14px;box-sizing:border-box;">
-            <div style="display:flex; gap:10px; margin-top:5px;">
-                <button onclick="registrarEntrada()" class="btn btn-primary">INGRESAR</button>
-                <button onclick="document.getElementById('modalEntrada').close()" class="btn" autofocus>Cancelar</button>
+    <dialog id="modalEntrada" style="padding:0; border:none; border-radius:18px; width:min(96vw,420px); overflow:hidden;">
+        <div class="modal-content" style="padding:0; width:100%;">
+
+            <!-- Header -->
+            <div style="background:linear-gradient(135deg,#1a2a4a,#2d4070); padding:18px 12px 14px; text-align:center;">
+                <span style="font-size:0.78rem; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:rgba(255,255,255,0.45);">Nueva Entrada</span>
+                <div style="margin-top:4px;">
+                    <span style="display:block; font-size:0.72rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.35); margin-bottom:2px;">Pieza</span>
+                    <strong id="entrada-nro-display" style="font-size:3.5rem; font-weight:900; color:#5a9fd4; line-height:1;"></strong>
+                </div>
+            </div>
+
+            <!-- Cuerpo -->
+            <div style="padding:16px 14px; box-sizing:border-box;">
+                <input type="hidden" id="nroPza">
+
+                <!-- Toggle AC -->
+                <input type="checkbox" id="acCheck" style="display:none;">
+                <label for="acCheck" class="ac-toggle-card" style="width:100%; box-sizing:border-box; margin-bottom:14px;">
+                    <span class="ac-toggle-icon" style="font-size:1.6rem;">❄️</span>
+                    <div style="flex:1;">
+                        <div class="ac-toggle-title" style="font-size:1rem;">Aire Acondicionado</div>
+                        <div class="ac-toggle-sub" style="font-size:0.8rem;">Toca para activar</div>
+                    </div>
+                    <span class="ac-toggle-pill"><span class="ac-toggle-thumb"></span></span>
+                </label>
+
+                <!-- Adelanto -->
+                <div style="margin-bottom:16px;">
+                    <div style="font-size:0.8rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-dim); margin-bottom:6px;">Adelanto (Bs)</div>
+                    <input type="number" id="adelanto" placeholder="0" value="0"
+                        style="width:100%; padding:14px 16px; background:var(--bg2); border:2px solid var(--border-vivid); border-radius:12px; color:var(--text); font-family:var(--font); font-size:1.2rem; font-weight:700; outline:none; box-sizing:border-box;">
+                </div>
+
+                <button onclick="registrarEntrada()" class="btn btn-primary" style="width:100%; padding:15px; font-size:1.05rem; font-weight:800; margin-bottom:8px;">INGRESAR</button>
+                <button onclick="document.getElementById('modalEntrada').close()" class="btn" style="width:100%; padding:13px; font-size:1rem;" autofocus>Cancelar</button>
             </div>
         </div>
     </dialog>
@@ -88,34 +138,66 @@
         </div>
     </dialog>
 
-    <dialog id="modalSalida">
-        <div class="modal-content">
-            <h3>HABITACION</h3>
-            <p style="margin-bottom:18px; text-align:center;">
-                <strong id="m-titulo" style="font-size:3.5rem; font-weight:900; color:#5a9fd4; line-height:1;"></strong>
-            </p>
-            <p><strong>Entrada:</strong> <span id="m-entrada"></span></p>
-            <label style="font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);">Hora de Salida:</label>
-            <div class="time-ampm-row">
-                <input type="number" id="m-salida-h" min="1" max="12" placeholder="HH" class="time-input">
-                <span class="time-sep">:</span>
-                <input type="number" id="m-salida-m" min="0" max="59" placeholder="MM" class="time-input">
-                <select id="m-salida-ampm" class="ampm-select">
-                    <option>AM</option>
-                    <option>PM</option>
-                </select>
+    <dialog id="modalSalida" style="padding:0; border:none; border-radius:18px; width:min(96vw,420px); overflow:hidden;">
+        <div class="modal-content" style="padding:0; width:100%;">
+
+            <!-- Header -->
+            <div style="background:linear-gradient(135deg,#1a2a4a,#2d4070); padding:18px 12px 14px; text-align:center;">
+                <span style="font-size:0.78rem; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:rgba(255,255,255,0.45);">Registrar Salida</span>
+                <div style="font-size:3.2rem; font-weight:900; color:#5a9fd4; line-height:1.1; margin:2px 0 5px;">
+                    <strong id="m-titulo"></strong>
+                </div>
+                <div style="font-size:0.92rem; color:rgba(255,255,255,0.5);">
+                    Entrada: <span id="m-entrada" style="color:rgba(255,255,255,0.9); font-weight:700;"></span>
+                </div>
             </div>
-            <p><strong>Adelanto:</strong> <span id="m-adelanto"></span> bs</p>
-            <p><strong>Precio Habitación:</strong> <span id="m-precio"></span> bs</p>
-            <p><strong>Tiempo total:</strong> <span id="m-tiempo"></span></p>
-            
-            <p style="margin:16px 0 8px; text-align:center;">
-                <span style="display:block; font-size:0.75rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:4px;">Total a pagar</span>
-                <strong id="m-total" style="font-size:2.4rem; font-weight:900; color:var(--limpia); line-height:1;"></strong>
-                <span style="font-size:1rem; font-weight:700; color:var(--limpia);"> bs</span>
-            </p>
-            <button onclick="procesarSalida()" class="btn btn-primary">DESPACHAR</button>
-            <button onclick="document.getElementById('modalSalida').close()" class="btn" autofocus>Cerrar</button>
+
+            <!-- Cuerpo -->
+            <div style="padding:14px 10px;">
+
+                <!-- Chips -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px;">
+                    <div style="background:var(--bg2); border-radius:12px; padding:10px 8px; text-align:center;">
+                        <div style="font-size:0.75rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-dim); margin-bottom:4px;">Adelanto</div>
+                        <div style="font-size:1.35rem; font-weight:900; color:var(--text);"><span id="m-adelanto"></span><span style="font-size:0.8rem;"> bs</span></div>
+                    </div>
+                    <div style="background:var(--bg2); border-radius:12px; padding:10px 8px; text-align:center;">
+                        <div style="font-size:0.75rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-dim); margin-bottom:4px;">Precio Hab.</div>
+                        <div style="font-size:1.35rem; font-weight:900; color:var(--text);"><span id="m-precio"></span><span style="font-size:0.8rem;"> bs</span></div>
+                    </div>
+                </div>
+
+                <!-- Hora salida -->
+                <div style="font-size:0.8rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-dim); margin-bottom:6px;">Hora de Salida</div>
+                <div class="time-ampm-row" style="margin-bottom:14px;">
+                    <input type="number" id="m-salida-h" min="1" max="12" placeholder="HH" class="time-input">
+                    <span class="time-sep">:</span>
+                    <input type="number" id="m-salida-m" min="0" max="59" placeholder="MM" class="time-input">
+                    <select id="m-salida-ampm" class="ampm-select">
+                        <option>AM</option>
+                        <option>PM</option>
+                    </select>
+                </div>
+
+                <!-- Tiempo + Total -->
+                <div style="background:var(--bg2); border-radius:14px; padding:13px 14px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between;">
+                    <div>
+                        <div style="font-size:0.75rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-dim); margin-bottom:3px;">Tiempo</div>
+                        <div style="font-size:1.25rem; font-weight:900; color:var(--text);" id="m-tiempo">—</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:0.75rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-dim); margin-bottom:3px;">Total a pagar</div>
+                        <div style="line-height:1;">
+                            <strong id="m-total" style="font-size:2.2rem; font-weight:900; color:var(--limpia);"></strong>
+                            <span style="font-size:0.95rem; font-weight:700; color:var(--limpia);"> bs</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <button onclick="procesarSalida()" class="btn btn-primary" style="width:100%; padding:15px; font-size:1.05rem; font-weight:800; margin-bottom:8px;">DESPACHAR</button>
+                <button onclick="document.getElementById('modalSalida').close()" class="btn" style="width:100%; padding:13px; font-size:1rem;" autofocus>Cerrar</button>
+            </div>
         </div>
     </dialog>
 

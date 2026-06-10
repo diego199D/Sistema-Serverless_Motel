@@ -867,6 +867,13 @@ async function registrarEntrada() {
     } catch (error) { Swal.fire('Error', 'No se pudo registrar: ' + error.message, 'error'); }
 }
 
+// Cerrar modales tocando fuera del contenido
+document.querySelectorAll('dialog').forEach(dialog => {
+    dialog.addEventListener('click', e => {
+        if (e.target === dialog) dialog.close();
+    });
+});
+
 function abrirModalEntrada(id, nro) {
     document.getElementById('nroPza').value = nro;
     document.getElementById('entrada-nro-display').innerText = nro;
