@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte Anual | Motel Mil Amores</title>
+    <link rel="stylesheet" href="estilo.css">
+    <link rel="icon" href="icon-192.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#5a6eb1">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+/* ── Contenedor de sección ── */
+.ra-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 22px 20px;
+    margin: 0 12px 18px;
+    border: 1px solid var(--border);
+}
+
+/* ── Selector de año ── */
+.ra-year-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+.ra-year-label {
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+.ra-year-select {
+    padding: 10px 22px 10px 16px;
+    background: var(--bg2);
+    border: 2px solid var(--border-vivid);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 1.4rem;
+    font-weight: 900;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%235a6eb1' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+}
+.ra-year-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(90,110,177,0.15);
+}
+
+/* ── Tarjetas resumen ── */
+.ra-resumen-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+.ra-resumen-chip {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 14px 12px;
+    text-align: center;
+    border: 1px solid var(--border);
+}
+.ra-resumen-chip .rc-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 5px;
+}
+.ra-resumen-chip .rc-val {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1;
+}
+.ra-resumen-chip.rc-green .rc-val { color: #16a34a; }
+.ra-resumen-chip.rc-blue  .rc-val { color: #3a8dff; }
+
+/* ── Tabla ── */
+.ra-table-wrap {
+    overflow-x: auto;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+}
+.ra-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font);
+    min-width: 380px;
+}
+.ra-table thead tr {
+    background: linear-gradient(135deg, #1a2a4a, #2d4070);
+}
+.ra-table thead th {
+    padding: 13px 16px;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    white-space: nowrap;
+    border: none;
+}
+.ra-table thead th:first-child { text-align: left; }
+.ra-table tbody tr {
+    transition: background 0.12s;
+    border-bottom: 1px solid var(--border);
+}
+.ra-table tbody tr:last-child { border-bottom: none; }
+.ra-table tbody tr:nth-child(even) { background: var(--surface2); }
+.ra-table tbody tr:hover { background: var(--bg2); }
+.ra-table tbody td {
+    padding: 12px 16px;
+    text-align: center;
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+}
+.ra-table tbody td:first-child {
+    text-align: left;
+    font-weight: 800;
+}
+
+/* ── Badges y helpers ── */
+.ra-badge-ac {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(58,141,255,0.13);
+    color: #3a8dff;
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 0.88rem;
+    font-weight: 800;
+}
+.ra-td-total {
+    white-space: nowrap;
+}
+.ra-total-num {
+    font-size: 1.15rem;
+    font-weight: 900;
+    color: #16a34a;
+    letter-spacing: -0.01em;
+}
+.ra-total-unit {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #16a34a;
+    margin-left: 3px;
+    opacity: 0.8;
+}
+body.dark-mode .ra-total-num,
+body.dark-mode .ra-total-unit { color: #22c55e; }
+.ra-td-prom {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+.ra-resumen-chip.rc-green .rc-val { color: #16a34a; }
+body.dark-mode .ra-resumen-chip.rc-green .rc-val { color: #22c55e; }
+.ra-mes-tag {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 5px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    background: rgba(245,188,66,0.18);
+    color: #c48c00;
+    margin-left: 7px;
+    vertical-align: middle;
+}
+body.dark-mode .ra-mes-tag {
+    background: rgba(245,188,66,0.12);
+    color: #f5bc42;
+}
+
+/* ── Estado de carga / vacío ── */
+.ra-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+.ra-spinner {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--border-vivid);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: ra-spin 0.7s linear infinite;
+    margin-bottom: 10px;
+}
+@keyframes ra-spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body class="light-mode">
+    <header>
+        <button id="menu-toggle" class="hamburger">☰</button>
+        <h1>Reporte Anual</h1>
+        <button id="theme-toggle">🌗</button>
+    </header>
+
+    <div id="drawer" class="drawer">
+        <nav>
+            <a class="nav-btn" href="dashboard.html">📊  Dashboard</a>
+            <a class="nav-btn" href="index.html">📋  Planilla</a>
+            <a class="nav-btn" href="calculadora/calculadora.html">🕘  Calculadora</a>
+            <a class="nav-btn" href="consultar-dia.html">⛅  Consultar día</a>
+            <a class="nav-btn" href="gestion.html">📄  Gestionar historial</a>
+            <a class="nav-btn" href="gastos.html">💸  Gastos</a>
+            <a class="nav-btn" href="reportes.html">📆  Reportes</a>
+            <a class="nav-btn active" href="reporte-anual.html">📅  Reporte Anual</a>
+            <a class="nav-btn" href="pago.html">💵  Pago QR</a>
+            <br><br><br><br>
+            <button class="btn-cerrar-sesion" onclick="cerrarSesion()">
+                🚪 Cerrar Sesion
+            </button>
+        </nav>
+    </div>
+    <div id="overlay" class="overlay"></div>
+
+    <main style="padding-top: 16px;">
+
+        <!-- Selector de año -->
+        <div class="ra-card">
+            <div class="ra-year-row">
+                <span class="ra-year-label">Año</span>
+                <select id="select-anio" class="ra-year-select"
+                        onchange="cargarReporteAnual(+this.value)">
+                </select>
+            </div>
+        </div>
+
+        <!-- Tabla -->
+        <div class="ra-card" id="ra-tabla-card">
+            <div class="ra-state" id="ra-loading">
+                <div class="ra-spinner"></div>
+                <div>Cargando datos...</div>
+            </div>
+            <div id="ra-contenido" style="display:none;">
+                <!-- resumen y tabla inyectados por JS -->
+            </div>
+        </div>
+
+    </main>
+
+    <script src="app.js?v=2"></script>
+</body>
+</html>
+<!-- PWA service worker -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('PWA lista y registrada', reg))
+        .catch(err => console.log('Error al registrar PWA', err));
+    });
+  }
+</script>

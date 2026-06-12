@@ -1434,3 +1434,159 @@ async function cargarGraficaSemanal() {
         }
     });
 }
+
+
+// ================================================================================================
+// ================================================================================================
+// ==                                                                                            ==
+// ==                          REPORTE ANUAL  –  reporte-anual.html                             ==
+// ==                                                                                            ==
+// ================================================================================================
+// ================================================================================================
+
+(function iniciarReporteAnual() {
+    const selectAnio = document.getElementById('select-anio');
+    if (!selectAnio) return;
+
+    const anioActual = new Date().getFullYear();
+
+    for (let a = anioActual; a >= anioActual - 6; a--) {
+        const opt = document.createElement('option');
+        opt.value = a;
+        opt.textContent = a;
+        if (a === anioActual) opt.selected = true;
+        selectAnio.appendChild(opt);
+    }
+
+    cargarReporteAnual(anioActual);
+})();
+
+async function cargarReporteAnual(anio) {
+    const loading   = document.getElementById('ra-loading');
+    const contenido = document.getElementById('ra-contenido');
+    if (!loading || !contenido) return;
+
+    loading.style.display   = 'block';
+    contenido.style.display = 'none';
+
+    // Convertir a UTC igual que el resto de la app para que el filtro fino en JS sea consistente
+    const inicioISO = new Date(`${anio}-01-01T00:00:00`).toISOString();
+    const finISO    = new Date(`${anio}-12-31T23:59:59`).toISOString();
+
+    const { data, error } = await _supabase
+        .from('registros')
+        .select('entrada, monto_total, pago_adelantado, ac')
+        .not('salida', 'is', null)   // solo registros completados (con salida registrada)
+        .gte('entrada', inicioISO)
+        .lte('entrada', finISO);
+
+    if (error) {
+        loading.innerHTML = '<div style="color:var(--danger);">Error al cargar datos.</div>';
+        return;
+    }
+
+    const hoy        = new Date();
+    const anioActual = hoy.getFullYear();
+    const mesActual  = hoy.getMonth() + 1;
+    const diaActual  = hoy.getDate();
+
+    const MESES = [
+        'Enero','Febrero','Marzo','Abril','Mayo','Junio',
+        'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
+    ];
+
+    const ultimoMes = anio < anioActual ? 12 : mesActual;
+
+    const filas = [];
+    for (let m = 1; m <= ultimoMes; m++) {
+        // Filtro fino en JS usando toLocaleDateString igual que el resto del proyecto
+        const mesStr  = String(m).padStart(2, '0');
+        const delMes  = (data || []).filter(r => {
+            const fechaLocal = new Date(r.entrada).toLocaleDateString('en-CA'); // "YYYY-MM-DD"
+            return fechaLocal.startsWith(`${anio}-${mesStr}`);
+        });
+
+        const clientes = delMes.length;
+        const ac       = delMes.filter(r => r.ac === true).length;
+        const total    = delMes.reduce((s, r) => s + (parseFloat(r.monto_total) || 0) + (parseFloat(r.pago_adelantado) || 0), 0);
+
+        const esActual = anio === anioActual && m === mesActual;
+        const divisor  = esActual ? diaActual : new Date(anio, m, 0).getDate();
+        const promedio = divisor > 0 ? clientes / divisor : 0;
+
+        filas.push({ mes: MESES[m - 1], esActual, divisor, ac, clientes, promedio, total });
+    }
+
+    _renderTablaAnual(filas);
+    loading.style.display   = 'none';
+    contenido.style.display = 'block';
+}
+
+function _renderTablaAnual(filas) {
+    const contenido = document.getElementById('ra-contenido');
+    if (!contenido) return;
+
+    if (filas.length === 0) {
+        contenido.innerHTML = '<div class="ra-state">Sin registros para este año.</div>';
+        return;
+    }
+
+    const totalAC       = filas.reduce((s, f) => s + f.ac, 0);
+    const totalClientes = filas.reduce((s, f) => s + f.clientes, 0);
+    const totalBs       = filas.reduce((s, f) => s + f.total, 0);
+
+    const filasHTML = filas.map(f => `
+        <tr>
+            <td>
+                ${f.mes}
+                ${f.esActual ? '<span class="ra-mes-tag">Hoy</span>' : ''}
+            </td>
+            <td><span class="ra-badge-ac">❄️ ${f.ac}</span></td>
+            <td>${f.clientes}</td>
+            <td class="ra-td-prom">
+                ${f.promedio.toFixed(1)}
+                <span style="font-size:0.72rem; color:var(--text-dim); font-weight:600;">
+                    &nbsp;/ ${f.esActual ? `${f.divisor}d` : `${f.divisor}d`}
+                </span>
+            </td>
+            <td class="ra-td-total">
+                <span class="ra-total-num">${f.total.toFixed(0)}</span>
+                <span class="ra-total-unit">bs</span>
+            </td>
+        </tr>
+    `).join('');
+
+    contenido.innerHTML = `
+        <div class="ra-resumen-grid" style="margin-bottom:18px;">
+            <div class="ra-resumen-chip">
+                <div class="rc-label">Clientes</div>
+                <div class="rc-val">${totalClientes}</div>
+            </div>
+            <div class="ra-resumen-chip rc-blue">
+                <div class="rc-label">A/C ❄️</div>
+                <div class="rc-val">${totalAC}</div>
+            </div>
+            <div class="ra-resumen-chip rc-green">
+                <div class="rc-label">Total Año</div>
+                <div class="rc-val">${totalBs.toFixed(0)}<span style="font-size:0.75rem; font-weight:700;"> bs</span></div>
+            </div>
+        </div>
+
+        <div class="ra-table-wrap">
+            <table class="ra-table">
+                <thead>
+                    <tr>
+                        <th>Mes</th>
+                        <th>A/C ❄️</th>
+                        <th>Clientes</th>
+                        <th>Prom. / Día</th>
+                        <th>Total Bs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${filasHTML}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
